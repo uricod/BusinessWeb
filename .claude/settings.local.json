@@ -3,7 +3,10 @@
     "allow": [
       "WebFetch(domain:bitbean.com)",
       "Bash(cd:*)",
-      "Bash(cd /c/Users/uri/Documents/AiBit/businessweb && npm run build 2>&1)"
+      "Bash(cd /c/Users/uri/Documents/AiBit/businessweb && npm run build 2>&1)",
+      "Bash(cd /c/Users/uri/Documents/AiBit/businessweb && rm -rf .next && NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build --no-turbopack 2>&1)",
+      "Bash(cd /c/Users/uri/Documents/AiBit/businessweb && rm -rf .next && NODE_OPTIONS=\"--max-old-space-size=8192\" npm run build 2>&1)",
+      "Bash(cd /c/Users/uri/Documents/AiBit/businessweb && NODE_OPTIONS=\"--max-old-space-size=8192\" npm run build 2>&1)"
     ]
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
@@ -18,7 +18,6 @@ const caseStudies = [
       "Automated daily exception reports",
     ],
     gradient: "from-rose-500 via-pink-500 to-rose-600",
-    accent: "text-rose-400",
     dotColor: "bg-rose-500",
   },
   {
@@ -34,7 +33,6 @@ const caseStudies = [
       "Eliminated manual reporting",
     ],
     gradient: "from-ocean-500 via-blue-500 to-ocean-600",
-    accent: "text-ocean-400",
     dotColor: "bg-ocean-500",
   },
   {
@@ -50,7 +48,6 @@ const caseStudies = [
       "Investor self-service portal",
     ],
     gradient: "from-emerald-500 via-teal-500 to-emerald-600",
-    accent: "text-emerald-400",
     dotColor: "bg-emerald-500",
   },
   {
@@ -66,23 +63,58 @@ const caseStudies = [
       "AI-powered inventory forecasting",
     ],
     gradient: "from-coral-500 via-orange-500 to-coral-600",
-    accent: "text-coral-400",
     dotColor: "bg-coral-500",
   },
 ];
+
+const AUTO_ADVANCE_MS = 8000;
+
+// Transition with rotateY + blur + scale for depth effect
+const slideVariants = {
+  enter: (direction: number) => ({
+    rotateY: direction > 0 ? 4 : -4,
+    scale: 0.92,
+    opacity: 0,
+    filter: "blur(4px)",
+  }),
+  center: {
+    rotateY: 0,
+    scale: 1,
+    opacity: 1,
+    filter: "blur(0px)",
+  },
+  exit: (direction: number) => ({
+    rotateY: direction > 0 ? -4 : 4,
+    scale: 0.92,
+    opacity: 0,
+    filter: "blur(4px)",
+  }),
+};
 
 export default function CaseStudies() {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  const navigate = (newIndex: number) => {
-    setDirection(newIndex > current ? 1 : -1);
-    setCurrent(newIndex);
-  };
+  const navigate = useCallback(
+    (newIndex: number) => {
+      setDirection(newIndex > current ? 1 : -1);
+      setCurrent(newIndex);
+    },
+    [current]
+  );
 
-  const next = () => navigate((current + 1) % caseStudies.length);
+  const next = useCallback(
+    () => navigate((current + 1) % caseStudies.length),
+    [current, navigate]
+  );
   const prev = () =>
     navigate((current - 1 + caseStudies.length) % caseStudies.length);
+
+  // Auto-advance timer
+  useEffect(() => {
+    const timer = setInterval(next, AUTO_ADVANCE_MS);
+    return () => clearInterval(timer);
+  }, [next]);
 
   const study = caseStudies[current];
 
@@ -96,34 +128,35 @@ export default function CaseStudies() {
           transition={{ duration: 0.6 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <span className="inline-flex items-center rounded-full border border-coral-200 bg-coral-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-coral-600">
-            Case Studies
+          <span className="inline-flex items-center rounded-full border border-yellow-300 bg-yellow-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-yellow-700">
+            Transformation
           </span>
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-navy sm:text-4xl lg:text-5xl">
             Real Problems.{" "}
-            <span className="bg-gradient-to-r from-ocean-600 to-coral-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-ocean-600 to-ocean-400 bg-clip-text text-transparent">
               Real Results.
             </span>
           </h2>
         </motion.div>
 
-        <div className="relative mt-16">
+        <div className="relative mt-16" style={{ perspective: "1200px" }}>
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
               custom={direction}
-              initial={{ opacity: 0, x: 80 * direction }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -80 * direction }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/50 ring-1 ring-slate-100"
+              style={{ transformStyle: "preserve-3d" }}
             >
               <div className="grid lg:grid-cols-2">
                 {/* Left: gradient panel */}
                 <div
                   className={`relative flex flex-col justify-center bg-gradient-to-br ${study.gradient} p-8 text-white sm:p-12`}
                 >
-                  {/* Decorative circles */}
                   <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
                   <div className="absolute -left-8 -bottom-8 h-48 w-48 rounded-full bg-black/10 blur-2xl" />
 
@@ -131,13 +164,21 @@ export default function CaseStudies() {
                     <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest backdrop-blur-sm">
                       {study.industry}
                     </span>
-                    <h3 className="mt-6 text-2xl font-bold sm:text-3xl leading-tight">
+                    <h3 className="mt-6 text-2xl font-bold leading-tight sm:text-3xl">
                       {study.title}
                     </h3>
                     <div className="mt-8 space-y-4">
-                      {study.results.map((result) => (
-                        <div
+                      {study.results.map((result, i) => (
+                        <motion.div
                           key={result}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{
+                            delay: 0.3 + i * 0.12,
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 20,
+                          }}
                           className="flex items-start gap-3"
                         >
                           <div className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
@@ -156,20 +197,20 @@ export default function CaseStudies() {
                           <span className="text-sm font-medium text-white/90">
                             {result}
                           </span>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   </div>
                 </div>
 
                 {/* Right: details */}
-                <div className="p-8 sm:p-12 flex flex-col justify-center">
+                <div className="flex flex-col justify-center p-8 sm:p-12">
                   <div>
                     <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                       <span className="h-px w-6 bg-slate-300" />
                       The Challenge
                     </h4>
-                    <p className="mt-4 text-slate-600 leading-relaxed">
+                    <p className="mt-4 leading-relaxed text-slate-600">
                       {study.challenge}
                     </p>
                   </div>
@@ -178,7 +219,7 @@ export default function CaseStudies() {
                       <span className="h-px w-6 bg-slate-300" />
                       Our Solution
                     </h4>
-                    <p className="mt-4 text-slate-600 leading-relaxed">
+                    <p className="mt-4 leading-relaxed text-slate-600">
                       {study.solution}
                     </p>
                   </div>
@@ -187,7 +228,7 @@ export default function CaseStudies() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation */}
+          {/* Navigation with circular progress indicator */}
           <div className="mt-10 flex items-center justify-center gap-6">
             <button
               onClick={prev}
@@ -196,18 +237,39 @@ export default function CaseStudies() {
             >
               <HiChevronLeft size={20} />
             </button>
-            <div className="flex gap-2.5">
+            <div className="flex items-center gap-3">
               {caseStudies.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => navigate(i)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    i === current
-                      ? `w-10 ${s.dotColor}`
-                      : "w-2.5 bg-slate-200 hover:bg-slate-300"
-                  }`}
+                  className="relative"
                   aria-label={`Go to case study ${i + 1}`}
-                />
+                >
+                  {i === current && (
+                    <svg className="absolute -inset-1 h-[calc(100%+8px)] w-[calc(100%+8px)]" viewBox="0 0 20 20">
+                      <motion.circle
+                        cx="10"
+                        cy="10"
+                        r="8"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        className="text-ocean-500"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: "linear" }}
+                        key={`progress-${current}`}
+                      />
+                    </svg>
+                  )}
+                  <div
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      i === current
+                        ? `w-10 ${s.dotColor}`
+                        : "w-2.5 bg-slate-200 hover:bg-slate-300"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
             <button
