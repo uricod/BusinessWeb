@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:bitbean.com)",
+      "Bash(cd:*)",
+      "Bash(cd /c/Users/uri/Documents/AiBit/businessweb && npm run build 2>&1)"
+    ]
+  }
+}
