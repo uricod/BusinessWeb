@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
@@ -57,9 +57,149 @@ const caseStories = [
 
 const AUTO_ADVANCE_MS = 10000;
 
+interface StoryCardProps {
+  story: (typeof caseStories)[number];
+  compact?: boolean;
+}
+
+function StoryCard({ story, compact }: StoryCardProps) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-2xl backdrop-blur-md h-full">
+      <div className={compact ? "flex flex-col" : "grid lg:grid-cols-5"}>
+        {/* Left: accent panel */}
+        <div
+          className={`relative flex flex-col justify-between ${compact ? "p-5" : "p-5 sm:p-10 lg:col-span-2"}`}
+          style={{
+            background: `linear-gradient(135deg, ${story.accent}20, ${story.accent}08)`,
+          }}
+        >
+          <div>
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-xl"
+              style={{ backgroundColor: `${story.accent}20` }}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke={story.accent}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d={story.icon} />
+              </svg>
+            </div>
+
+            <div className="mt-3">
+              <span
+                className="inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white/60"
+                style={{ backgroundColor: `${story.accent}20` }}
+              >
+                {story.industry}
+              </span>
+            </div>
+            <h3
+              className={`mt-3 font-bold leading-tight text-white ${compact ? "text-base" : "text-lg sm:text-2xl"}`}
+            >
+              {story.title}
+            </h3>
+          </div>
+
+          {/* Results */}
+          <div className={`space-y-2.5 ${compact ? "mt-5" : "mt-8"}`}>
+            {story.results.map((result) => (
+              <div key={result} className="flex items-start gap-2">
+                <div
+                  className="mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${story.accent}30` }}
+                >
+                  <svg
+                    className="h-2.5 w-2.5 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium text-white/80 sm:text-sm">
+                  {result}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: problem/solution details */}
+        <div
+          className={`flex flex-col justify-center ${compact ? "p-5" : "p-5 sm:p-10 lg:col-span-3"}`}
+        >
+          <div>
+            <h4 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30">
+              <span
+                className="h-px w-6"
+                style={{ backgroundColor: `${story.accent}40` }}
+              />
+              The Problem
+            </h4>
+            <p
+              className={`mt-3 leading-relaxed text-slate-400 ${compact ? "text-xs" : "text-sm"}`}
+            >
+              {story.problem}
+            </p>
+          </div>
+          <div className={compact ? "mt-5" : "mt-8"}>
+            <h4 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30">
+              <span
+                className="h-px w-6"
+                style={{ backgroundColor: `${story.accent}40` }}
+              />
+              What We Built
+            </h4>
+            <p
+              className={`mt-3 leading-relaxed text-slate-400 ${compact ? "text-xs" : "text-sm"}`}
+            >
+              {story.solution}
+            </p>
+          </div>
+
+          {/* CTA */}
+          <div className={compact ? "mt-5" : "mt-8"}>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-5 py-2.5 text-sm font-semibold text-navy transition-all hover:bg-yellow-300 hover:shadow-lg hover:shadow-yellow-400/20"
+            >
+              Build Something Like This
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Testimonials() {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [mobileActive, setMobileActive] = useState(0);
 
   const navigate = useCallback(
     (newIndex: number) => {
@@ -81,6 +221,20 @@ export default function Testimonials() {
     return () => clearInterval(timer);
   }, [next]);
 
+  // Track which card is visible in the mobile scroll container
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      const scrollLeft = el.scrollLeft;
+      const cardWidth = el.scrollWidth / caseStories.length;
+      const idx = Math.round(scrollLeft / cardWidth);
+      setMobileActive(Math.min(idx, caseStories.length - 1));
+    };
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const story = caseStories[current];
 
   return (
@@ -96,10 +250,14 @@ export default function Testimonials() {
       </div>
 
       {/* Grid pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-        backgroundSize: "60px 60px",
-      }} />
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -118,12 +276,48 @@ export default function Testimonials() {
               Real Solutions.
             </span>
           </h2>
-          <p className="mt-4 text-lg text-slate-400">
-            We don&apos;t build generic software. Every solution is built for how your business actually operates.
+          <p className="mt-4 text-base text-slate-400 sm:text-lg">
+            We don&apos;t build generic software. Every solution is built for
+            how your business actually operates.
           </p>
         </motion.div>
 
-        <div className="relative mt-16" style={{ perspective: "1200px" }}>
+        {/* ===== Mobile: horizontal swipe cards ===== */}
+        <div className="mt-10 md:hidden">
+          <div
+            ref={scrollRef}
+            className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide"
+            style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
+          >
+            {caseStories.map((s, i) => (
+              <div
+                key={i}
+                className="w-[85vw] flex-shrink-0 snap-center"
+              >
+                <StoryCard story={s} compact />
+              </div>
+            ))}
+          </div>
+          {/* Dot indicators */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {caseStories.map((_, i) => (
+              <div
+                key={i}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === mobileActive
+                    ? "w-8 bg-yellow-400"
+                    : "w-2 bg-white/20"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* ===== Desktop: animated carousel ===== */}
+        <div
+          className="relative mt-16 hidden md:block"
+          style={{ perspective: "1200px" }}
+        >
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
@@ -152,102 +346,9 @@ export default function Testimonials() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-2xl backdrop-blur-md"
               style={{ transformStyle: "preserve-3d" }}
             >
-              <div className="grid lg:grid-cols-5">
-                {/* Left: accent panel */}
-                <div className="relative flex flex-col justify-between p-5 sm:p-10 lg:col-span-2" style={{ background: `linear-gradient(135deg, ${story.accent}20, ${story.accent}08)` }}>
-                  {/* Decorative icon */}
-                  <div>
-                    <motion.div
-                      className="flex h-14 w-14 items-center justify-center rounded-2xl"
-                      style={{ backgroundColor: `${story.accent}20` }}
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                    >
-                      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke={story.accent} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-                        <path d={story.icon} />
-                      </svg>
-                    </motion.div>
-
-                    <div className="mt-4">
-                      <span className="inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white/60" style={{ backgroundColor: `${story.accent}20` }}>
-                        {story.industry}
-                      </span>
-                    </div>
-                    <h3 className="mt-3 text-lg font-bold leading-tight text-white sm:mt-4 sm:text-2xl">
-                      {story.title}
-                    </h3>
-                  </div>
-
-                  {/* Results */}
-                  <div className="mt-8 space-y-3">
-                    {story.results.map((result, i) => (
-                      <motion.div
-                        key={result}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          delay: 0.4 + i * 0.1,
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 20,
-                        }}
-                        className="flex items-start gap-2.5"
-                      >
-                        <div className="mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${story.accent}30` }}>
-                          <svg className="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <span className="text-sm font-medium text-white/80">{result}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Right: problem/solution details */}
-                <div className="flex flex-col justify-center p-5 sm:p-10 lg:col-span-3">
-                  <div>
-                    <h4 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30">
-                      <span className="h-px w-6" style={{ backgroundColor: `${story.accent}40` }} />
-                      The Problem
-                    </h4>
-                    <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                      {story.problem}
-                    </p>
-                  </div>
-                  <div className="mt-8">
-                    <h4 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30">
-                      <span className="h-px w-6" style={{ backgroundColor: `${story.accent}40` }} />
-                      What We Built
-                    </h4>
-                    <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                      {story.solution}
-                    </p>
-                  </div>
-
-                  {/* CTA */}
-                  <motion.div
-                    className="mt-8"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <a
-                      href="#contact"
-                      className="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-6 py-3 text-sm font-semibold text-navy transition-all hover:bg-yellow-300 hover:shadow-lg hover:shadow-yellow-400/20"
-                    >
-                      Build Something Like This
-                      <svg className="h-4 w-4 transition-transform hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </a>
-                  </motion.div>
-                </div>
-              </div>
+              <StoryCard story={story} />
             </motion.div>
           </AnimatePresence>
 
@@ -269,7 +370,10 @@ export default function Testimonials() {
                   aria-label={`Go to story ${i + 1}`}
                 >
                   {i === current && (
-                    <svg className="absolute -inset-1 h-[calc(100%+8px)] w-[calc(100%+8px)]" viewBox="0 0 20 20">
+                    <svg
+                      className="absolute -inset-1 h-[calc(100%+8px)] w-[calc(100%+8px)]"
+                      viewBox="0 0 20 20"
+                    >
                       <motion.circle
                         cx="10"
                         cy="10"
@@ -280,7 +384,10 @@ export default function Testimonials() {
                         className="text-yellow-400"
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: 1 }}
-                        transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: "linear" }}
+                        transition={{
+                          duration: AUTO_ADVANCE_MS / 1000,
+                          ease: "linear",
+                        }}
                         key={`progress-${current}`}
                       />
                     </svg>

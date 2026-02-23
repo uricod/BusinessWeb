@@ -44,6 +44,15 @@ body {
   overflow-x: hidden;
 }
 
+/* Hide scrollbar for swipe containers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* === Animations === */
 
 /* Animated gradient text */
