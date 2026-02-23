@@ -86,13 +86,13 @@ export default function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="relative overflow-hidden bg-navy py-24 sm:py-32"
+      className="relative overflow-hidden bg-navy py-16 sm:py-24 lg:py-32"
     >
       {/* Mesh gradient background */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-ocean-500/10 blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-ocean-400/8 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-yellow-400/[0.03] blur-[200px]" />
+        <div className="absolute top-0 left-1/4 h-[250px] w-[250px] sm:h-[500px] sm:w-[500px] rounded-full bg-ocean-500/10 blur-[80px] sm:blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 h-[200px] w-[200px] sm:h-[400px] sm:w-[400px] rounded-full bg-ocean-400/8 blur-[60px] sm:blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] sm:h-[600px] sm:w-[600px] rounded-full bg-yellow-400/[0.03] blur-[100px] sm:blur-[200px]" />
       </div>
 
       {/* Grid pattern overlay */}
@@ -157,7 +157,7 @@ export default function Testimonials() {
             >
               <div className="grid lg:grid-cols-5">
                 {/* Left: accent panel */}
-                <div className="relative flex flex-col justify-between p-8 sm:p-10 lg:col-span-2" style={{ background: `linear-gradient(135deg, ${story.accent}20, ${story.accent}08)` }}>
+                <div className="relative flex flex-col justify-between p-5 sm:p-10 lg:col-span-2" style={{ background: `linear-gradient(135deg, ${story.accent}20, ${story.accent}08)` }}>
                   {/* Decorative icon */}
                   <div>
                     <motion.div
@@ -177,7 +177,7 @@ export default function Testimonials() {
                         {story.industry}
                       </span>
                     </div>
-                    <h3 className="mt-4 text-xl font-bold leading-tight text-white sm:text-2xl">
+                    <h3 className="mt-3 text-lg font-bold leading-tight text-white sm:mt-4 sm:text-2xl">
                       {story.title}
                     </h3>
                   </div>
@@ -209,7 +209,7 @@ export default function Testimonials() {
                 </div>
 
                 {/* Right: problem/solution details */}
-                <div className="flex flex-col justify-center p-8 sm:p-10 lg:col-span-3">
+                <div className="flex flex-col justify-center p-5 sm:p-10 lg:col-span-3">
                   <div>
                     <h4 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30">
                       <span className="h-px w-6" style={{ backgroundColor: `${story.accent}40` }} />

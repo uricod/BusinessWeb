@@ -40,7 +40,7 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="relative overflow-hidden py-24 sm:py-32"
+      className="relative overflow-hidden py-16 sm:py-24 lg:py-32"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-white via-ocean-50/30 to-white" />
 

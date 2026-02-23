@@ -54,7 +54,7 @@ export default function ChaosToOrderExperience() {
   const coolOrbOpacity = useTransform(scrollYProgress, [0.3, 0.6], [0, 0.5]);
 
   return (
-    <div ref={containerRef} style={{ height: "400vh" }}>
+    <div ref={containerRef} className="h-[300vh] sm:h-[400vh]">
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* Layer 0: Background color */}
         <motion.div
@@ -64,16 +64,16 @@ export default function ChaosToOrderExperience() {
 
         {/* Hot gradient orbs (chaos phase) */}
         <motion.div className="absolute inset-0" style={{ opacity: hotOrbOpacity }}>
-          <div className="absolute top-[10%] left-[15%] h-[500px] w-[500px] rounded-full bg-[rgba(249,115,22,0.15)] blur-[120px]" />
-          <div className="absolute top-[40%] right-[10%] h-[400px] w-[400px] rounded-full bg-[rgba(239,68,68,0.12)] blur-[100px]" />
-          <div className="absolute bottom-[20%] left-[40%] h-[350px] w-[350px] rounded-full bg-[rgba(217,70,239,0.1)] blur-[80px]" />
-          <div className="absolute top-[60%] right-[30%] h-[200px] w-[200px] rounded-full bg-[rgba(251,191,36,0.12)] blur-[60px]" />
+          <div className="absolute top-[10%] left-[15%] h-[250px] w-[250px] sm:h-[500px] sm:w-[500px] rounded-full bg-[rgba(249,115,22,0.15)] blur-[80px] sm:blur-[120px]" />
+          <div className="absolute top-[40%] right-[10%] h-[200px] w-[200px] sm:h-[400px] sm:w-[400px] rounded-full bg-[rgba(239,68,68,0.12)] blur-[60px] sm:blur-[100px]" />
+          <div className="absolute bottom-[20%] left-[40%] h-[180px] w-[180px] sm:h-[350px] sm:w-[350px] rounded-full bg-[rgba(217,70,239,0.1)] blur-[60px] sm:blur-[80px]" />
+          <div className="absolute top-[60%] right-[30%] h-[120px] w-[120px] sm:h-[200px] sm:w-[200px] rounded-full bg-[rgba(251,191,36,0.12)] blur-[40px] sm:blur-[60px]" />
         </motion.div>
 
         {/* Cool gradient orbs (dashboard phase) */}
         <motion.div className="absolute inset-0" style={{ opacity: coolOrbOpacity }}>
-          <div className="absolute top-[20%] left-[20%] h-[400px] w-[400px] rounded-full bg-ocean-500/8 blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[20%] h-[300px] w-[300px] rounded-full bg-[rgba(14,165,233,0.06)] blur-[100px]" />
+          <div className="absolute top-[20%] left-[20%] h-[200px] w-[200px] sm:h-[400px] sm:w-[400px] rounded-full bg-ocean-500/8 blur-[80px] sm:blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[20%] h-[150px] w-[150px] sm:h-[300px] sm:w-[300px] rounded-full bg-[rgba(14,165,233,0.06)] blur-[60px] sm:blur-[100px]" />
         </motion.div>
 
         {/* Layer 1: ChaosCanvas */}
@@ -100,14 +100,14 @@ export default function ChaosToOrderExperience() {
             </span>
           </motion.div>
 
-          <h1 className="max-w-4xl text-center text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="max-w-4xl text-center text-3xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
             We Know Your Business.{" "}
             <span className="bg-gradient-to-r from-yellow-300 via-white to-yellow-300 bg-clip-text text-transparent animate-gradient-x">
               We Build Your Future.
             </span>
           </h1>
 
-          <p className="mt-6 max-w-2xl text-center text-lg leading-relaxed text-white/70 sm:text-xl">
+          <p className="mt-4 max-w-2xl text-center text-base leading-relaxed text-white/70 sm:mt-6 sm:text-xl">
             From scattered systems to unified dashboards.
           </p>
 

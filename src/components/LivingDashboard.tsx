@@ -247,10 +247,10 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
         </div>
 
         {/* Dashboard header strip */}
-        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/40 px-4 py-2">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/40 px-2 py-1.5 sm:px-4 sm:py-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             <motion.div
-              className="flex h-6 w-6 items-center justify-center rounded-md bg-ocean-500"
+              className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-md bg-ocean-500"
               initial={{ scale: 0 }}
               animate={active ? { scale: 1 } : {}}
               transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
@@ -259,7 +259,7 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
             </motion.div>
-            <span className="text-[11px] font-semibold text-slate-700">Operations Command Center</span>
+            <span className="text-[9px] sm:text-[11px] font-semibold text-slate-700">Operations Command Center</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="hidden rounded-full bg-ocean-50 px-2 py-0.5 text-[9px] font-semibold text-ocean-600 sm:inline">6 Systems Connected</span>
@@ -270,11 +270,11 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
         {/* Dashboard body */}
         <div className="flex flex-col lg:flex-row">
           {/* Main content: system panels */}
-          <div className="relative flex-1 p-3 sm:p-4">
+          <div className="relative flex-1 p-2 sm:p-4">
             {/* Data flow SVG overlay */}
             <DataFlowLines active={active} />
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-3 lg:grid-cols-3">
               {systemPanels.map((panel, i) => (
                 <motion.div
                   key={panel.label}
@@ -285,7 +285,7 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
                     duration: 0.4,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  className="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-3 transition-shadow hover:shadow-md"
+                  className="group relative overflow-hidden rounded-lg sm:rounded-xl border border-slate-100 bg-white p-2 sm:p-3 transition-shadow hover:shadow-md"
                   style={{
                     animation: active ? `breathe 4s ease-in-out ${i * 0.7}s infinite` : undefined,
                   }}
@@ -359,27 +359,27 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
             </div>
           </div>
 
-          {/* Sidebar: AI Agent Feed */}
-          <div className="w-full border-t border-slate-100 bg-slate-50/50 p-3 lg:w-64 lg:border-l lg:border-t-0">
+          {/* Sidebar: AI Agent Feed — hidden on small mobile, visible from sm up */}
+          <div className="hidden sm:block w-full border-t border-slate-100 bg-slate-50/50 p-3 lg:w-64 lg:border-l lg:border-t-0">
             {active && <AgentFeed />}
           </div>
         </div>
 
         {/* KPI Strip + CTA */}
-        <div className="flex items-stretch border-t border-slate-100">
-          <div className="grid flex-1 grid-cols-2 gap-px bg-slate-100 lg:grid-cols-4">
+        <div className="flex flex-col sm:flex-row sm:items-stretch border-t border-slate-100">
+          <div className="grid flex-1 grid-cols-2 gap-px bg-slate-100 sm:grid-cols-4">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
-                className="bg-white p-3 text-center sm:p-4"
+                className="bg-white p-2.5 text-center sm:p-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={active ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: 0.5 + i * 0.1, duration: 0.4 }}
               >
-                <div className="bg-gradient-to-br from-ocean-600 to-ocean-400 bg-clip-text text-lg font-bold text-transparent sm:text-xl">
+                <div className="bg-gradient-to-br from-ocean-600 to-ocean-400 bg-clip-text text-base font-bold text-transparent sm:text-xl">
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 </div>
-                <div className="mt-0.5 text-[10px] font-medium text-slate-500 sm:text-xs">
+                <div className="mt-0.5 text-[9px] font-medium text-slate-500 sm:text-xs">
                   {stat.label}
                 </div>
               </motion.div>
@@ -387,7 +387,7 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
           </div>
           <motion.a
             href="#contact"
-            className="flex items-center justify-center bg-yellow-400 px-6 text-sm font-bold text-navy transition-all hover:bg-yellow-300 sm:px-8"
+            className="flex items-center justify-center bg-yellow-400 px-6 py-3 text-sm font-bold text-navy transition-all hover:bg-yellow-300 sm:py-0 sm:px-8"
             initial={{ opacity: 0, x: 20 }}
             animate={active ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.8, duration: 0.4 }}
