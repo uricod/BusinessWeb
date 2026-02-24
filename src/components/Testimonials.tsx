@@ -53,6 +53,54 @@ const caseStories = [
     accent: "#ef4444",
     icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
   },
+  {
+    industry: "Healthcare — Home Health",
+    title: "EVV Fraud Detection & Real-Time Shift Monitoring Platform",
+    problem:
+      "A home health agency was struggling with clock-in fraud and compliance gaps in their Electronic Visit Verification (EVV) system. Caregivers were logging visits that didn't match GPS data, shift times were being manipulated, and there was no way to monitor active shifts in real time. The agency's insurance carrier flagged them as high-risk, driving premiums through the roof and threatening their ability to operate.",
+    solution:
+      "We built a real-time monitoring platform that cross-references every EVV clock-in against GPS location, device signatures, and scheduled shift data to detect anomalies instantly. Supervisors get a live dashboard showing all active shifts with location verification, time tracking, and automatic fraud flags. Pattern detection algorithms identify repeat offenders and suspicious trends before they become systemic issues. The system generates audit-ready compliance reports that proved to the insurer the agency had eliminated its fraud exposure.",
+    results: [
+      "Insurance premiums cut by 20% within the first renewal cycle",
+      "Real-time visibility into all active caregiver shifts",
+      "Automated fraud detection with instant supervisor alerts",
+      "Audit-ready compliance reports for insurers & regulators",
+    ],
+    accent: "#8b5cf6",
+    icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+  },
+  {
+    industry: "Healthcare — Dialysis",
+    title: "Automated Billing & Invoice Generation Platform",
+    problem:
+      "A dialysis company was creating invoices entirely by hand — pulling treatment data from their clinical system, cross-referencing each client's contracted rates, and assembling invoices with summary and detail pages in spreadsheets. The process took a dedicated billing team nearly two weeks every cycle to complete. Errors were common, contracted terms were frequently misapplied, and late invoices meant delayed payments that strained cash flow.",
+    solution:
+      "We built an automated billing platform that syncs directly with the company's clinical and contract management systems. The app pulls completed treatments, matches each line item against the client's specific contracted terms, and generates polished invoices with both summary and detail pages — all in about 30 seconds. Every invoice is audit-ready with full breakdowns by treatment type, date, and rate. The system flags any contract discrepancies before invoices go out, eliminating billing disputes.",
+    results: [
+      "Invoice cycle reduced from 2 weeks to 30 seconds",
+      "Auto-generated summary & detail pages per client",
+      "Direct sync with clinical system & contracted terms",
+      "Near-zero billing errors and faster collections",
+    ],
+    accent: "#f59e0b",
+    icon: "M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z",
+  },
+  {
+    industry: "Real Estate — Investment Management",
+    title: "Live LP & Investor Statement Portal",
+    problem:
+      "A real estate management firm was producing investor and LP statements manually every quarter — pulling data from their property management system, accounting software, and spreadsheets to assemble performance reports for each fund and investor. The process took weeks, statements were outdated by the time they reached investors, and LPs were constantly calling the office asking for updates on distributions, occupancy, and returns between reporting periods.",
+    solution:
+      "We built a custom investor portal that connects directly to the firm's property management and accounting systems, giving LPs and investors real-time visibility into fund performance. Each investor logs into a personalized dashboard showing their capital account, distributions, IRR, equity multiple, and property-level metrics — all updating live. The platform auto-generates quarterly statements with one click, but investors no longer have to wait for them because the data is always current.",
+    results: [
+      "Real-time investor dashboards replacing quarterly PDF statements",
+      "Live property-level performance metrics & fund analytics",
+      "Investor inquiries reduced by 70% with self-service access",
+      "One-click quarterly statement generation from live data",
+    ],
+    accent: "#06b6d4",
+    icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1m-2 0h2",
+  },
 ];
 
 const AUTO_ADVANCE_MS = 10000;
