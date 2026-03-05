@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HiMenu, HiX } from "react-icons/hi";
 
 const navLinks = [
+  { label: "Blog", href: "/blog" },
   { label: "Our Work", href: "#testimonials" },
   { label: "Contact", href: "#contact" },
 ];
