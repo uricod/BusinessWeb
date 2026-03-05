@@ -9,7 +9,11 @@
       "Bash(cd /c/Users/uri/Documents/AiBit/businessweb && NODE_OPTIONS=\"--max-old-space-size=8192\" npm run build 2>&1)",
       "WebSearch",
       "WebFetch(domain:developers.cloudflare.com)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(node:*)",
+      "Bash(mkdir:*)"
     ]
   }
 }
