@@ -18,6 +18,7 @@ const caseStories = [
       "Cross-portfolio reconciliation in minutes, not weeks",
       "Full audit trail across 10+ banking relationships",
     ],
+    impact: { metric: "2,400+", label: "hours saved annually" },
     accent: "#3b82f6",
     icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
   },
@@ -34,6 +35,7 @@ const caseStories = [
       "18% reduction in overproduction waste",
       "Real-time sales visibility across all channels",
     ],
+    impact: { metric: "10%", label: "increase in sales revenue" },
     accent: "#10b981",
     icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
   },
@@ -50,6 +52,7 @@ const caseStories = [
       "Automated daily exception flagging & routing",
       "Revenue leakage reduced by $2.1M annually",
     ],
+    impact: { metric: "20%", label: "faster collections — millions recovered" },
     accent: "#ef4444",
     icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
   },
@@ -61,11 +64,12 @@ const caseStories = [
     solution:
       "We built a real-time monitoring platform that cross-references every EVV clock-in against GPS location, device signatures, and scheduled shift data to detect anomalies instantly. Supervisors get a live dashboard showing all active shifts with location verification, time tracking, and automatic fraud flags. Pattern detection algorithms identify repeat offenders and suspicious trends before they become systemic issues. The system generates audit-ready compliance reports that proved to the insurer the agency had eliminated its fraud exposure.",
     results: [
-      "Insurance premiums cut by 20% within the first renewal cycle",
+      "Insurance premiums cut by 50% within the first renewal cycle",
       "Real-time visibility into all active caregiver shifts",
       "Automated fraud detection with instant supervisor alerts",
       "Audit-ready compliance reports for insurers & regulators",
     ],
+    impact: { metric: "50%", label: "cut in insurance premiums" },
     accent: "#8b5cf6",
     icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
   },
@@ -80,8 +84,9 @@ const caseStories = [
       "Invoice cycle reduced from 2 weeks to 30 seconds",
       "Auto-generated summary & detail pages per client",
       "Direct sync with clinical system & contracted terms",
-      "Near-zero billing errors and faster collections",
+      "Invoices sent 5 days earlier — faster collections",
     ],
+    impact: { metric: "500+", label: "hours saved per billing cycle" },
     accent: "#f59e0b",
     icon: "M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z",
   },
@@ -98,6 +103,7 @@ const caseStories = [
       "Investor inquiries reduced by 70% with self-service access",
       "One-click quarterly statement generation from live data",
     ],
+    impact: { metric: "38%", label: "increase in investor retention" },
     accent: "#06b6d4",
     icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1m-2 0h2",
   },
@@ -153,6 +159,40 @@ function StoryCard({ story, compact }: StoryCardProps) {
               {story.title}
             </h3>
           </div>
+
+          {/* Impact callout */}
+          {story.impact && (
+            <div
+              className={`flex items-center gap-3 rounded-xl border border-white/10 ${compact ? "mt-4 px-3 py-2.5" : "mt-6 px-4 py-3"}`}
+              style={{
+                background: `linear-gradient(135deg, ${story.accent}15, ${story.accent}05)`,
+                borderColor: `${story.accent}30`,
+              }}
+            >
+              <svg
+                className="h-5 w-5 flex-shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={story.accent}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+              <div className="flex items-baseline gap-1.5">
+                <span
+                  className="text-lg font-bold sm:text-xl"
+                  style={{ color: story.accent }}
+                >
+                  {story.impact.metric}
+                </span>
+                <span className="text-xs font-medium text-white/60 sm:text-sm">
+                  {story.impact.label}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Results */}
           <div className={`space-y-2.5 ${compact ? "mt-5" : "mt-8"}`}>
