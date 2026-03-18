@@ -123,10 +123,10 @@ export default function ChaosToOrderExperience() {
 
         {/* Layer 3: Living Dashboard */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center px-2 sm:px-4"
+          className="absolute inset-0 flex items-center justify-center px-2 py-6 sm:px-4 sm:py-8"
           style={{ opacity: dashboardOpacity }}
         >
-          <div className="flex w-full max-w-6xl flex-col items-center gap-3 sm:gap-5">
+          <div className="flex w-full max-w-6xl flex-col items-center gap-6 sm:gap-8">
             <LivingDashboard active={dashboardActive} />
             <TrustStrip active={dashboardActive} />
           </div>

@@ -85,6 +85,29 @@ const systemPanels = [
   },
 ];
 
+const processSignals = [
+  {
+    label: "Intake",
+    value: "184 files",
+    color: "#3b82f6",
+  },
+  {
+    label: "Review",
+    value: "3 flagged",
+    color: "#10b981",
+  },
+  {
+    label: "Routing",
+    value: "12 queues",
+    color: "#8b5cf6",
+  },
+  {
+    label: "Posting",
+    value: "$2.4M staged",
+    color: "#f59e0b",
+  },
+];
+
 function MiniSparkline({
   data,
   color,
@@ -233,7 +256,7 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
         {/* Dashboard body */}
         <div className="flex flex-col lg:flex-row">
           {/* Main content: system panels */}
-          <div className="relative flex-1 p-2 sm:p-4">
+          <div className="relative flex-1 p-2 sm:p-3">
             {/* Data flow SVG overlay */}
             <DataFlowLines active={active} />
 
@@ -320,30 +343,69 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
                 </motion.div>
               ))}
             </div>
+
+            <motion.div
+              className="relative mt-2 overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:mt-3 sm:p-2.5"
+              initial={{ opacity: 0, y: 10 }}
+              animate={active ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.55, duration: 0.4 }}
+            >
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(59,130,246,0.05),transparent_35%,transparent_65%,rgba(16,185,129,0.05))]" />
+              <div className="relative flex flex-col gap-2 sm:gap-2.5">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      AI Process Layer
+                    </div>
+                    <div className="mt-0.5 text-[11px] font-medium text-slate-600 sm:text-xs">
+                      Live orchestration across intake, review, routing, and posting.
+                    </div>
+                  </div>
+                  <span className="w-fit rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-500 shadow-sm">
+                    Avg cycle time down 63%
+                  </span>
+                </div>
+
+                <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
+                  {processSignals.map((signal, i) => (
+                    <motion.div
+                      key={signal.label}
+                      className="flex items-center justify-between rounded-lg border border-white/90 bg-white/95 px-3 py-2 shadow-sm"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={active ? { opacity: 1, y: 0 } : {}}
+                      transition={{ delay: 0.62 + i * 0.06, duration: 0.3 }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                          <span
+                            className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70"
+                            style={{ backgroundColor: signal.color }}
+                          />
+                          <span
+                            className="relative inline-flex h-2 w-2 rounded-full"
+                            style={{ backgroundColor: signal.color }}
+                          />
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                          {signal.label}
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-slate-800 sm:text-xs">
+                        {signal.value}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           {/* Sidebar: AI Agent Feed — hidden on small mobile, visible from sm up */}
-          <div className="hidden sm:block w-full border-t border-slate-100 bg-slate-50/50 p-3 lg:w-64 lg:border-l lg:border-t-0">
+          <div className="hidden sm:block w-full border-t border-slate-100 bg-slate-50/50 p-2.5 lg:w-64 lg:border-l lg:border-t-0">
             {active && <AgentFeed />}
           </div>
         </div>
 
-        <div className="flex justify-end border-t border-slate-100 bg-white px-3 py-3 sm:px-4">
-          <motion.a
-            href="#contact"
-            className="flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 text-sm font-bold text-navy transition-all hover:bg-yellow-300 sm:px-8"
-            initial={{ opacity: 0, x: 20 }}
-            animate={active ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: 0.55, duration: 0.4 }}
-          >
-            <span className="flex items-center gap-2 whitespace-nowrap">
-              Get Started
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </span>
-          </motion.a>
-        </div>
       </motion.div>
     </div>
   );
