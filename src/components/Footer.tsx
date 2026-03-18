@@ -1,10 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  HiOutlineMail,
-  HiOutlinePhone,
-} from "react-icons/hi";
 
 const footerLinks = {
   Company: ["Our Work", "Contact"],
@@ -114,22 +110,6 @@ export default function Footer() {
               expertise with cutting-edge custom application development. We
               know your business inside out.
             </p>
-            <div className="mt-6 flex flex-col gap-3">
-              <a
-                href="mailto:hello@theacropora.com"
-                className="flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-white"
-              >
-                <HiOutlineMail size={16} />
-                hello@theacropora.com
-              </a>
-              <a
-                href="tel:+1234567890"
-                className="flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-white"
-              >
-                <HiOutlinePhone size={16} />
-                (123) 456-7890
-              </a>
-            </div>
           </motion.div>
 
           {/* Link columns */}
