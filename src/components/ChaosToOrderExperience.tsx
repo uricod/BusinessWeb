@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import ChaosCanvas from "./ChaosCanvas";
 import LivingDashboard from "./LivingDashboard";
+import TrustStrip from "./TrustStrip";
 
 export default function ChaosToOrderExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -122,10 +123,13 @@ export default function ChaosToOrderExperience() {
 
         {/* Layer 3: Living Dashboard */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0 flex items-center justify-center px-2 sm:px-4"
           style={{ opacity: dashboardOpacity }}
         >
-          <LivingDashboard active={dashboardActive} />
+          <div className="flex w-full max-w-6xl flex-col items-center gap-3 sm:gap-5">
+            <LivingDashboard active={dashboardActive} />
+            <TrustStrip active={dashboardActive} />
+          </div>
         </motion.div>
 
         {/* Layer 4: Scroll indicator */}

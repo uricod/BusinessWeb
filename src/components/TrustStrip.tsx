@@ -8,40 +8,49 @@ const trustPoints = [
   { metric: "10,000+", label: "hours saved for clients" },
 ];
 
-export default function TrustStrip() {
-  return (
-    <section className="relative overflow-hidden bg-navy">
-      {/* Subtle top/bottom borders */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+interface TrustStripProps {
+  active?: boolean;
+}
 
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center gap-8 sm:flex-row sm:justify-center sm:gap-12 lg:gap-20"
-        >
-          {trustPoints.map((point, i) => (
-            <motion.div
-              key={point.label}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="flex flex-col items-center text-center"
-            >
-              <span className="bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl">
-                {point.metric}
-              </span>
-              <span className="mt-1 text-sm font-medium text-slate-400">
-                {point.label}
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
+export default function TrustStrip({ active = true }: TrustStripProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18, scale: 0.98 }}
+      animate={active ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ delay: 0.65, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="w-full max-w-5xl px-4"
+    >
+      <div className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-navy shadow-[0_30px_80px_-35px_rgba(15,23,42,0.9)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.18),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.14),transparent_34%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+        <div className="relative px-5 py-5 sm:px-8 sm:py-6">
+          <div className="mb-4 flex items-center justify-center">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300 sm:text-[11px]">
+              Proven Operator Impact
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-3 sm:gap-6">
+            {trustPoints.map((point, i) => (
+              <motion.div
+                key={point.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={active ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 0.75 + i * 0.08, duration: 0.35 }}
+                className="flex flex-col items-center justify-center"
+              >
+                <span className="bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-500 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl">
+                  {point.metric}
+                </span>
+                <span className="mt-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 sm:text-[11px]">
+                  {point.label}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </div>
-    </section>
+    </motion.div>
   );
 }

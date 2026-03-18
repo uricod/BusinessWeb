@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import AgentFeed from "./AgentFeed";
 import DataFlowLines from "./DataFlowLines";
 
@@ -85,42 +84,6 @@ const systemPanels = [
     trendUp: false,
   },
 ];
-
-const stats = [
-  { value: 10, suffix: "+", label: "Years Experience" },
-  { value: 50, suffix: "+", label: "Solutions Delivered" },
-  { value: 4, suffix: "", label: "Industries Served" },
-  { value: 98, suffix: "%", label: "Client Retention" },
-];
-
-function AnimatedCounter({ target, suffix }: { target: number; suffix: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const step = target / 120;
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 1000 / 60);
-    return () => clearInterval(timer);
-  }, [isInView, target]);
-
-  return (
-    <span ref={ref}>
-      {count}
-      {suffix}
-    </span>
-  );
-}
 
 function MiniSparkline({
   data,
@@ -365,32 +328,13 @@ export default function LivingDashboard({ active }: LivingDashboardProps) {
           </div>
         </div>
 
-        {/* KPI Strip + CTA */}
-        <div className="flex flex-col sm:flex-row sm:items-stretch border-t border-slate-100">
-          <div className="grid flex-1 grid-cols-2 gap-px bg-slate-100 sm:grid-cols-4">
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                className="bg-white p-2.5 text-center sm:p-4"
-                initial={{ opacity: 0, y: 10 }}
-                animate={active ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.5 + i * 0.1, duration: 0.4 }}
-              >
-                <div className="bg-gradient-to-br from-ocean-600 to-ocean-400 bg-clip-text text-base font-bold text-transparent sm:text-xl">
-                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                </div>
-                <div className="mt-0.5 text-[9px] font-medium text-slate-500 sm:text-xs">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        <div className="flex justify-end border-t border-slate-100 bg-white px-3 py-3 sm:px-4">
           <motion.a
             href="#contact"
-            className="flex items-center justify-center bg-yellow-400 px-6 py-3 text-sm font-bold text-navy transition-all hover:bg-yellow-300 sm:py-0 sm:px-8"
+            className="flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 text-sm font-bold text-navy transition-all hover:bg-yellow-300 sm:px-8"
             initial={{ opacity: 0, x: 20 }}
             animate={active ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: 0.8, duration: 0.4 }}
+            transition={{ delay: 0.55, duration: 0.4 }}
           >
             <span className="flex items-center gap-2 whitespace-nowrap">
               Get Started
