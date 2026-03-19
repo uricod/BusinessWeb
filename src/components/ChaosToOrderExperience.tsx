@@ -15,34 +15,34 @@ export default function ChaosToOrderExperience() {
   // === Scroll-derived transforms ===
 
   // Canvas progress: 0-1 maps to chaos → convergence → settled
-  const canvasProgress = useTransform(scrollYProgress, [0, 0.72], [0, 1]);
-  const canvasOpacity = useTransform(scrollYProgress, [0.62, 0.82], [1, 0.18]);
+  const canvasProgress = useTransform(scrollYProgress, [0, 0.78], [0, 1]);
+  const canvasOpacity = useTransform(scrollYProgress, [0.72, 0.92], [1, 0.42]);
   // Background: dark navy → light
-  const bgR = useTransform(scrollYProgress, [0, 0.45, 0.82], [15, 30, 244]);
-  const bgG = useTransform(scrollYProgress, [0, 0.45, 0.82], [23, 45, 248]);
-  const bgB = useTransform(scrollYProgress, [0, 0.45, 0.82], [42, 80, 252]);
+  const bgR = useTransform(scrollYProgress, [0, 0.5, 0.92], [15, 30, 240]);
+  const bgG = useTransform(scrollYProgress, [0, 0.5, 0.92], [23, 45, 247]);
+  const bgB = useTransform(scrollYProgress, [0, 0.5, 0.92], [42, 80, 252]);
   const bgColor = useTransform(
     [bgR, bgG, bgB] as const,
     ([r, g, b]) => `rgb(${r}, ${g}, ${b})`
   );
 
   // Tagline: fades in through chaos, holds longer, then exits before next section
-  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.12, 0.48, 0.68], [0, 1, 1, 0]);
+  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.12, 0.56, 0.78], [0, 1, 1, 0]);
   const taglineBlur = useTransform(scrollYProgress, [0.03, 0.12], [12, 0]);
   const taglineFilter = useTransform(taglineBlur, (v) => `blur(${v}px)`);
   const taglineY = useTransform(scrollYProgress, [0.03, 0.12], [30, 0]);
 
   // Scroll indicator: visible only at start
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
-  const heroArrowOpacity = useTransform(scrollYProgress, [0.18, 0.26, 0.55, 0.72], [0, 1, 1, 0]);
+  const heroArrowOpacity = useTransform(scrollYProgress, [0.18, 0.26, 0.62, 0.84], [0, 1, 1, 0]);
 
   // Hot gradient orbs fade out
   const hotOrbOpacity = useTransform(scrollYProgress, [0, 0.38], [1, 0]);
   // Cool gradient orbs fade in
-  const coolOrbOpacity = useTransform(scrollYProgress, [0.35, 0.78], [0, 0.45]);
+  const coolOrbOpacity = useTransform(scrollYProgress, [0.4, 0.9], [0, 0.45]);
 
   return (
-    <section id="top" ref={containerRef} className="h-[220vh] sm:h-[260vh]">
+    <section id="top" ref={containerRef} className="h-[180vh] sm:h-[220vh]">
       <div className="sticky top-0 h-svh overflow-hidden sm:h-screen">
         {/* Layer 0: Background color */}
         <motion.div

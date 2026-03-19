@@ -7,7 +7,7 @@ export default function ProvenOperatorImpactSection() {
   return (
     <section
       id="proven-impact"
-      className="relative overflow-hidden bg-[linear-gradient(180deg,#f6fbff_0%,#eef6ff_48%,#ffffff_100%)] py-20 sm:py-24"
+      className="relative -mt-px overflow-hidden bg-[linear-gradient(180deg,#f0f7ff_0%,#eef6ff_28%,#ffffff_100%)] pt-8 pb-20 sm:pt-12 sm:pb-24"
     >
       <div className="absolute inset-0">
         <div className="absolute left-[8%] top-12 h-40 w-40 rounded-full bg-ocean-400/10 blur-3xl sm:h-72 sm:w-72" />
@@ -28,12 +28,9 @@ export default function ProvenOperatorImpactSection() {
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-navy sm:text-4xl lg:text-5xl">
             Operational credibility first.
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-            Before the product demo, show the outcomes. This section stands on its own so the metrics read cleanly on mobile.
-          </p>
         </motion.div>
 
-        <div className="mt-10 w-full">
+        <div className="mt-8 w-full sm:mt-10">
           <TrustStrip active />
         </div>
 
@@ -43,7 +40,7 @@ export default function ProvenOperatorImpactSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="mt-10 flex flex-col items-center gap-2 text-slate-500 transition-colors hover:text-ocean-700"
+          className="mt-8 flex flex-col items-center gap-2 text-slate-500 transition-colors hover:text-ocean-700 sm:mt-10"
           aria-label="Scroll to dashboard"
         >
           <span className="text-[11px] font-semibold uppercase tracking-[0.28em]">
