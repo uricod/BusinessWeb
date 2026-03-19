@@ -56,7 +56,7 @@ export default function ChaosToOrderExperience() {
 
   return (
     <div ref={containerRef} className="h-[300vh] sm:h-[400vh]">
-      <div className="sticky top-0 h-screen overflow-hidden">
+      <div className="sticky top-0 h-svh overflow-hidden sm:h-screen">
         {/* Layer 0: Background color */}
         <motion.div
           className="absolute inset-0"
@@ -123,12 +123,12 @@ export default function ChaosToOrderExperience() {
 
         {/* Layer 3: Living Dashboard */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center px-2 py-6 sm:px-4 sm:py-8"
+          className="absolute inset-0 flex items-start justify-center px-2 pt-3 pb-5 sm:items-center sm:px-4 sm:py-8"
           style={{ opacity: dashboardOpacity }}
         >
-          <div className="flex w-full max-w-6xl flex-col items-center gap-6 sm:gap-8">
-            <LivingDashboard active={dashboardActive} />
+          <div className="flex w-full max-w-6xl flex-col items-center gap-4 sm:gap-8">
             <TrustStrip active={dashboardActive} />
+            <LivingDashboard active={dashboardActive} />
           </div>
         </motion.div>
 
