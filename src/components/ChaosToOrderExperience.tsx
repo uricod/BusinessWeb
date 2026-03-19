@@ -1,61 +1,48 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import ChaosCanvas from "./ChaosCanvas";
-import LivingDashboard from "./LivingDashboard";
-import TrustStrip from "./TrustStrip";
 
 export default function ChaosToOrderExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dashboardActive, setDashboardActive] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Track when dashboard should become active
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    setDashboardActive(v > 0.5);
-  });
-
   // === Scroll-derived transforms ===
 
   // Canvas progress: 0-1 maps to chaos → convergence → settled
-  const canvasProgress = useTransform(scrollYProgress, [0, 0.55], [0, 1]);
-  // Canvas fades out as dashboard fades in
-  const canvasOpacity = useTransform(scrollYProgress, [0.45, 0.6], [1, 0]);
-  // Dashboard fades in
-  const dashboardOpacity = useTransform(scrollYProgress, [0.45, 0.6], [0, 1]);
+  const canvasProgress = useTransform(scrollYProgress, [0, 0.72], [0, 1]);
+  const canvasOpacity = useTransform(scrollYProgress, [0.62, 0.82], [1, 0.18]);
   // Background: dark navy → light
-  const bgR = useTransform(scrollYProgress, [0, 0.4, 0.6], [15, 30, 248]);
-  const bgG = useTransform(scrollYProgress, [0, 0.4, 0.6], [23, 45, 250]);
-  const bgB = useTransform(scrollYProgress, [0, 0.4, 0.6], [42, 80, 252]);
+  const bgR = useTransform(scrollYProgress, [0, 0.45, 0.82], [15, 30, 244]);
+  const bgG = useTransform(scrollYProgress, [0, 0.45, 0.82], [23, 45, 248]);
+  const bgB = useTransform(scrollYProgress, [0, 0.45, 0.82], [42, 80, 252]);
   const bgColor = useTransform(
     [bgR, bgG, bgB] as const,
     ([r, g, b]) => `rgb(${r}, ${g}, ${b})`
   );
 
-  // Tagline: fades in through chaos, fades out before dashboard
-  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.12, 0.3, 0.42], [0, 1, 1, 0]);
+  // Tagline: fades in through chaos, holds longer, then exits before next section
+  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.12, 0.48, 0.68], [0, 1, 1, 0]);
   const taglineBlur = useTransform(scrollYProgress, [0.03, 0.12], [12, 0]);
   const taglineFilter = useTransform(taglineBlur, (v) => `blur(${v}px)`);
   const taglineY = useTransform(scrollYProgress, [0.03, 0.12], [30, 0]);
 
-  // CTA buttons: appear with tagline
-  const ctaOpacity = useTransform(scrollYProgress, [0.1, 0.18, 0.3, 0.42], [0, 1, 1, 0]);
-
   // Scroll indicator: visible only at start
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
+  const heroArrowOpacity = useTransform(scrollYProgress, [0.18, 0.26, 0.55, 0.72], [0, 1, 1, 0]);
 
   // Hot gradient orbs fade out
-  const hotOrbOpacity = useTransform(scrollYProgress, [0, 0.35], [1, 0]);
+  const hotOrbOpacity = useTransform(scrollYProgress, [0, 0.38], [1, 0]);
   // Cool gradient orbs fade in
-  const coolOrbOpacity = useTransform(scrollYProgress, [0.3, 0.6], [0, 0.5]);
+  const coolOrbOpacity = useTransform(scrollYProgress, [0.35, 0.78], [0, 0.45]);
 
   return (
-    <div ref={containerRef} className="h-[300vh] sm:h-[400vh]">
+    <section id="top" ref={containerRef} className="h-[220vh] sm:h-[260vh]">
       <div className="sticky top-0 h-svh overflow-hidden sm:h-screen">
         {/* Layer 0: Background color */}
         <motion.div
@@ -112,27 +99,37 @@ export default function ChaosToOrderExperience() {
             From scattered systems to unified dashboards.
           </p>
 
-          {/* Scroll hint */}
           <motion.p
             className="mt-8 text-sm text-white/40"
-            style={{ opacity: ctaOpacity }}
+            style={{ opacity: heroArrowOpacity }}
           >
-            Scroll to see the transformation
+            Scroll to see proven operator impact
           </motion.p>
         </motion.div>
 
-        {/* Layer 3: Living Dashboard */}
-        <motion.div
-          className="absolute inset-0 flex items-start justify-center px-2 pt-3 pb-5 sm:items-center sm:px-4 sm:py-8"
-          style={{ opacity: dashboardOpacity }}
+        <motion.a
+          href="#proven-impact"
+          aria-label="Scroll to Proven Operator Impact"
+          className="absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-white/55 transition-colors hover:text-white/80"
+          style={{ opacity: heroArrowOpacity }}
         >
-          <div className="flex w-full max-w-6xl flex-col items-center gap-4 sm:gap-8">
-            <TrustStrip active={dashboardActive} />
-            <LivingDashboard active={dashboardActive} />
-          </div>
-        </motion.div>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.28em]">
+            Proven impact
+          </span>
+          <motion.svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 9l-7 7-7-7" />
+          </motion.svg>
+        </motion.a>
 
-        {/* Layer 4: Scroll indicator */}
+        {/* Layer 3: Initial scroll indicator */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
           style={{ opacity: scrollIndicatorOpacity }}
@@ -154,6 +151,6 @@ export default function ChaosToOrderExperience() {
           </motion.svg>
         </motion.div>
       </div>
-    </div>
+    </section>
   );
 }
