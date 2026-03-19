@@ -26,7 +26,7 @@ export default function ProvenOperatorImpactSection() {
             Proven Operator Impact
           </span>
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-navy sm:text-4xl lg:text-5xl">
-            Operational credibility first.
+            Results that hold up in the real world.
           </h2>
         </motion.div>
 
@@ -44,7 +44,7 @@ export default function ProvenOperatorImpactSection() {
           aria-label="Scroll to dashboard"
         >
           <span className="text-[11px] font-semibold uppercase tracking-[0.28em]">
-            See the dashboard
+            View the dashboard
           </span>
           <motion.svg
             width="28"

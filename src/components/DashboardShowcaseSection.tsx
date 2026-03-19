@@ -26,10 +26,10 @@ export default function DashboardShowcaseSection() {
             Unified Dashboard
           </span>
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-navy sm:text-4xl lg:text-5xl">
-            Then show the operating system.
+            A clearer view of how the business runs.
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-            The dashboard now gets its own section and full vertical space on mobile, instead of being compressed underneath the impact strip.
+            One place to see the workflows, metrics, and exceptions that actually run your business.
           </p>
         </motion.div>
 
