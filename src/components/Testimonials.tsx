@@ -107,6 +107,23 @@ const caseStories = [
     accent: "#06b6d4",
     icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1m-2 0h2",
   },
+  {
+    industry: "Corporate Operations — Executive Enablement",
+    title: "Secure OpenClaw Executive Agent Workspace",
+    problem:
+      "Executive teams were drowning in fragmented information across inboxes, internal updates, market headlines, and manually prepared briefing documents. Important emails were getting buried, leaders had no single place to track company-wide developments or public sentiment, and reporting packs still depended on analysts pulling data together by hand. Because the environment involved sensitive internal communications and strategic decisions, any AI solution also had to meet strict security, access-control, and audit requirements.",
+    solution:
+      "We designed a secure OpenClaw agent environment for corporate leadership that acts as a trusted executive assistant. The agent stack triages inbound email, highlights what needs immediate attention, compiles automated company news digests, monitors public sentiment across key brands and topics, and produces recurring executive reports without exposing confidential data outside approved systems. Role-based access, workflow approvals, and full audit trails keep the experience safe, controlled, and enterprise-ready.",
+    results: [
+      "Executive email triage prioritized automatically by urgency and context",
+      "Daily internal news and company updates delivered in one briefing",
+      "Public sentiment monitoring across brands, markets, and risk topics",
+      "Automated reporting with secure workflows, permissions, and audit trails",
+    ],
+    impact: { metric: "60%", label: "less manual executive prep work" },
+    accent: "#14b8a6",
+    icon: "M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z",
+  },
 ];
 
 const AUTO_ADVANCE_MS = 10000;
