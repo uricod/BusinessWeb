@@ -35,16 +35,16 @@ export default function ProvenOperatorImpactSection() {
         </div>
 
         <motion.a
-          href="#dashboard-showcase"
+          href="#tier-selector"
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ delay: 0.15, duration: 0.4 }}
           className="mt-8 flex flex-col items-center gap-2 text-slate-500 transition-colors hover:text-ocean-700 sm:mt-10"
-          aria-label="Scroll to dashboard"
+          aria-label="Scroll to tier selector"
         >
           <span className="text-[11px] font-semibold uppercase tracking-[0.28em]">
-            View the dashboard
+            Choose your track
           </span>
           <motion.svg
             width="28"
