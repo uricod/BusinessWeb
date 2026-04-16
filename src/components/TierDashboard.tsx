@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import type { Tier } from "./TierSelector";
 import LivingDashboard from "./LivingDashboard";
 
@@ -329,147 +330,260 @@ function SmartAutomationDashboard() {
 
 function AIOpsDashboard() {
   const messages = [
-    { from: "agent", text: "Good morning. I've processed overnight emails — 3 items need your attention, 47 were auto-filed.", time: "7:02 AM" },
-    { from: "user", text: "What are the 3 items?", time: "7:15 AM" },
-    { from: "agent", text: "1. Board meeting agenda from Sarah — needs your input by EOD\n2. Legal flagged a contract clause in the Meridian deal\n3. Q4 earnings draft is ready for your review", time: "7:15 AM" },
-    { from: "user", text: "Draft a response to Sarah, I'll review the contract at 2pm", time: "7:18 AM" },
-    { from: "agent", text: "Done. Response drafted and queued for your approval. I've blocked 2-3pm on your calendar for the Meridian contract review and pulled the relevant clauses.", time: "7:18 AM" },
+    {
+      from: "agent",
+      text: "This is what your calendar looks like. You have 5 meetings today at 8:30 AM, 10:00 AM, 12:30 PM, 2:00 PM, and 4:15 PM.",
+      time: "6:50 AM",
+    },
+    {
+      from: "agent",
+      text: "I reviewed your census and it looks like Building Main Facility dropped to 90% occupancy yesterday, with 125 residents. I see chatter in Slack and Teams that the intake coordinator was fired. Should I start an email to Admin?",
+      time: "7:03 AM",
+    },
+    {
+      from: "user",
+      text: "Yes.",
+      time: "7:05 AM",
+    },
+    {
+      from: "agent",
+      text: "I have been researching your idea about a tech spinoff and this is what I found. Should I turn it into a podcast and send it to your Spotify for your morning walk?",
+      time: "7:11 AM",
+    },
   ];
 
-  return (
-    <div className="mx-auto w-full max-w-5xl px-4">
-      <div className="flex flex-col gap-6 lg:flex-row">
-        {/* Phone mockup - WhatsApp style */}
-        <motion.div
-          className="mx-auto w-full max-w-[320px] lg:mx-0"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="overflow-hidden rounded-[2rem] border-4 border-slate-800 bg-slate-900 shadow-2xl">
-            {/* Phone status bar */}
-            <div className="flex items-center justify-between bg-slate-800 px-5 py-2">
-              <span className="text-[10px] text-white/60">9:41</span>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-4 rounded-sm border border-white/40" />
-              </div>
-            </div>
+  const scenes = [
+    {
+      id: "calendar",
+      focusLabel: "Current Focus",
+      focusTitle: "Calendar briefing assembled",
+      focusStatus: "Reviewing",
+      focusBody: "AcroporaAgent summarizes the day before the executive team logs in and flags schedule compression early.",
+      syncTime: "Last sync 6:52 AM",
+      automationCards: [
+        { label: "Meetings Today", value: "05", detail: "Stacked across operations, census review, and investor prep.", accent: "#38bdf8" },
+        { label: "First Briefing", value: "8:30", detail: "Leadership standup is first on deck this morning.", accent: "#22c55e" },
+        { label: "Focus Gaps", value: "02", detail: "Two open windows remain for urgent follow-up.", accent: "#f59e0b" },
+      ],
+      activityItems: [
+        { title: "Calendar parsed", detail: "Pulled meetings from Outlook and grouped by decision priority.", status: "Live" },
+        { title: "Travel buffers checked", detail: "No site-to-site conflict detected for the afternoon meetings.", status: "Clear" },
+        { title: "Executive brief drafted", detail: "Morning summary prepared for approval and send-out.", status: "Ready" },
+      ],
+    },
+    {
+      id: "occupancy",
+      focusLabel: "Risk Signal",
+      focusTitle: "Occupancy dipped at Building Main Facility",
+      focusStatus: "Escalation Suggested",
+      focusBody: "The agent correlates census movement with team chatter and surfaces the likely operational cause before occupancy falls further.",
+      syncTime: "Last sync 7:04 AM",
+      automationCards: [
+        { label: "Occupancy", value: "90%", detail: "Building Main Facility closed the day below target occupancy.", accent: "#f97316" },
+        { label: "Resident Count", value: "125", detail: "Down from the previous day and outside the normal band.", accent: "#38bdf8" },
+        { label: "Source Alerts", value: "02", detail: "Slack and Teams both reference intake disruption.", accent: "#ef4444" },
+      ],
+      activityItems: [
+        { title: "Census anomaly detected", detail: "Yesterday's move-outs exceeded normal intake replacement velocity.", status: "Flagged" },
+        { title: "Internal chatter matched", detail: "Staff communication points to intake coordinator termination.", status: "Correlated" },
+        { title: "Admin draft recommended", detail: "Escalation path prepared but still waiting on approval.", status: "Pending" },
+      ],
+    },
+    {
+      id: "approval",
+      focusLabel: "Action Queue",
+      focusTitle: "Admin escalation approved",
+      focusStatus: "Queued",
+      focusBody: "Once leadership approves, AcroporaAgent moves directly from signal detection to drafted communication with the necessary context attached.",
+      syncTime: "Last sync 7:06 AM",
+      automationCards: [
+        { label: "Draft Status", value: "Ready", detail: "Email to Admin is staged with occupancy data and staffing context.", accent: "#22c55e" },
+        { label: "Recipients", value: "03", detail: "Admin, COO, and regional operations included in the draft.", accent: "#38bdf8" },
+        { label: "Attachments", value: "02", detail: "Census trend and message excerpts attached for context.", accent: "#a78bfa" },
+      ],
+      activityItems: [
+        { title: "Approval captured", detail: "Executive response logged and linked to the escalation request.", status: "Logged" },
+        { title: "Email draft assembled", detail: "Occupancy trend, resident count, and staffing cause included in one thread.", status: "Ready" },
+        { title: "Follow-up timer armed", detail: "Agent will check for Admin response before the noon review.", status: "Scheduled" },
+      ],
+    },
+    {
+      id: "podcast",
+      focusLabel: "New Opportunity",
+      focusTitle: "Tech spinoff research prepared",
+      focusStatus: "Ready To Send",
+      focusBody: "AcroporaAgent pivots from operations into research synthesis, then offers the best delivery format for the executive's routine.",
+      syncTime: "Last sync 7:12 AM",
+      automationCards: [
+        { label: "Research Memos", value: "04", detail: "Market comps, buyer interest, compliance, and staffing model summarized.", accent: "#38bdf8" },
+        { label: "Audio Draft", value: "08m", detail: "Estimated podcast runtime for a morning walk briefing.", accent: "#22c55e" },
+        { label: "Delivery", value: "Spotify", detail: "Ready to publish privately to the executive listening feed.", accent: "#f59e0b" },
+      ],
+      activityItems: [
+        { title: "Spinoff research synthesized", detail: "Combined internal notes with market and operational benchmarks.", status: "Compiled" },
+        { title: "Audio outline generated", detail: "Structured as a short narrative briefing with next-step recommendations.", status: "Drafted" },
+        { title: "Distribution ready", detail: "Private Spotify upload can be triggered after one response.", status: "Waiting" },
+      ],
+    },
+  ];
 
-            {/* Chat header */}
-            <div className="flex items-center gap-3 bg-[#075e54] px-4 py-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#25d366]">
-                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  const [visibleMessageCount, setVisibleMessageCount] = useState(1);
+
+  useEffect(() => {
+    const delay = visibleMessageCount < messages.length ? 2400 : 5200;
+    const timeout = window.setTimeout(() => {
+      setVisibleMessageCount((current) => (current < messages.length ? current + 1 : 1));
+    }, delay);
+
+    return () => window.clearTimeout(timeout);
+  }, [messages.length, visibleMessageCount]);
+
+  const currentScene =
+    visibleMessageCount >= 4
+      ? scenes[3]
+      : visibleMessageCount >= 3
+        ? scenes[2]
+        : visibleMessageCount >= 2
+          ? scenes[1]
+          : scenes[0];
+
+  const visibleMessages = messages.slice(0, visibleMessageCount);
+
+  return (
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <motion.div
+        className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 shadow-[0_40px_120px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 sm:px-6">
+          <div className="flex gap-1.5">
+            <div className="h-2.5 w-2.5 rounded-full bg-rose-400/90" />
+            <div className="h-2.5 w-2.5 rounded-full bg-amber-300/90" />
+            <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/90" />
+          </div>
+          <div className="min-w-0 flex-1 rounded-full border border-white/10 bg-slate-900/80 px-4 py-2">
+            <span className="block truncate text-[11px] text-slate-400 sm:text-xs">agent.acropora.ai/workspace</span>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200 sm:text-[11px]">
+            <span className="h-2 w-2 rounded-full bg-emerald-300" />
+            AcroporaAgent Online
+          </div>
+        </div>
+
+        <div className="grid gap-5 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.85fr)] lg:p-8">
+          <motion.div
+            className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#f3ecdf] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+            initial={{ opacity: 0, x: -24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.55, delay: 0.1 }}
+          >
+            <div className="flex items-center gap-3 bg-[#0d6b63] px-4 py-4 sm:px-5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400/20 text-emerald-100 ring-1 ring-inset ring-white/15">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M4 6.5A2.5 2.5 0 016.5 4h11A2.5 2.5 0 0120 6.5v7A2.5 2.5 0 0117.5 16h-11A2.5 2.5 0 014 13.5v-7z" />
                 </svg>
               </div>
-              <div>
-                <div className="text-sm font-semibold text-white">OpenClaw Agent</div>
-                <div className="text-[10px] text-green-200">online</div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-base font-semibold text-white sm:text-lg">AcroporaAgent</div>
+                <div className="text-[11px] uppercase tracking-[0.22em] text-emerald-100/80">Executive operations assistant</div>
+              </div>
+              <div className="rounded-full bg-emerald-300/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
+                Live
               </div>
             </div>
 
-            {/* Chat messages */}
-            <div className="bg-[#ece5dd] px-3 py-4 space-y-2" style={{ minHeight: "360px" }}>
-              {messages.map((msg, i) => (
+            <div className="space-y-3 px-3 py-4 sm:px-5 sm:py-5" style={{ minHeight: "420px" }}>
+              {visibleMessages.map((msg, i) => (
                 <motion.div
-                  key={i}
+                  key={`${msg.time}-${i}`}
                   className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.15 }}
+                  initial={i === visibleMessages.length - 1 ? { opacity: 0, y: 14, scale: 0.98 } : false}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.28 }}
+                  layout="position"
                 >
                   <div
-                    className={`max-w-[85%] rounded-lg px-3 py-2 ${
+                    className={`max-w-[88%] rounded-[1.25rem] px-4 py-3 shadow-sm sm:max-w-[80%] ${
                       msg.from === "user"
-                        ? "bg-[#dcf8c6] rounded-tr-none"
-                        : "bg-white rounded-tl-none"
+                        ? "rounded-tr-md bg-[#d9fdd3] text-slate-900"
+                        : "rounded-tl-md bg-white text-slate-800"
                     }`}
                   >
-                    <p className="text-[11px] text-slate-800 whitespace-pre-line">{msg.text}</p>
-                    <p className="text-[9px] text-slate-400 text-right mt-1">{msg.time}</p>
+                    <p className="whitespace-pre-line text-[13px] leading-6 sm:text-sm">{msg.text}</p>
+                    <p className="mt-2 text-right text-[10px] text-slate-400">{msg.time}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Desktop agent workspace */}
-        <motion.div
-          className="flex-1"
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/95 shadow-2xl shadow-slate-300/40">
-            {/* Browser bar */}
-            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/80 px-4 py-2.5">
-              <div className="flex gap-1.5">
-                <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-                <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
+          <motion.div
+            className="flex flex-col gap-4 sm:gap-5"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.55, delay: 0.2 }}
+          >
+            <div className="rounded-[1.6rem] border border-cyan-400/20 bg-cyan-400/10 p-4 sm:p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100/80">{currentScene.focusLabel}</p>
+                  <h3 className="mt-2 text-xl font-semibold text-white">{currentScene.focusTitle}</h3>
+                </div>
+                <div className="rounded-full border border-cyan-300/20 bg-slate-950/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
+                  {currentScene.focusStatus}
+                </div>
               </div>
-              <div className="ml-3 flex-1 rounded-md bg-white px-3 py-1 shadow-inner shadow-slate-100">
-                <span className="text-[11px] text-slate-400">agent.openclaw.ai/workspace</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-pink-400" />
-                <span className="text-[10px] font-medium text-pink-600">5 Agents Active</span>
-              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                {currentScene.focusBody}
+              </p>
             </div>
 
-            <div className="p-4 space-y-3">
-              {/* Agent tasks */}
-              {[
-                { agent: "Email Triage", status: "Running", action: "Processing 47 new emails", color: "#3b82f6", progress: 72 },
-                { agent: "News Monitor", status: "Complete", action: "Daily digest ready for review", color: "#10b981", progress: 100 },
-                { agent: "Sentiment Tracker", status: "Running", action: "Scanning 3 brand mentions", color: "#8b5cf6", progress: 45 },
-                { agent: "Report Builder", status: "Queued", action: "Q4 earnings summary scheduled", color: "#f59e0b", progress: 0 },
-                { agent: "Calendar Manager", status: "Running", action: "Optimizing tomorrow's schedule", color: "#ef4444", progress: 88 },
-              ].map((task, i) => (
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {currentScene.automationCards.map((card, i) => (
                 <motion.div
-                  key={task.agent}
-                  className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white p-3"
-                  initial={{ opacity: 0, y: 10 }}
+                  key={card.label}
+                  className="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-4"
+                  initial={false}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.08 }}
+                  transition={{ duration: 0.22, delay: i * 0.04 }}
                 >
-                  <div
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: `${task.color}15` }}
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
+                  <div className="mt-3 text-3xl font-semibold text-white" style={{ color: card.accent }}>{card.value}</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">{card.detail}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">Agent Activity</h3>
+                <span className="text-[11px] text-slate-500">{currentScene.syncTime}</span>
+              </div>
+              <div className="mt-4 space-y-3">
+                {currentScene.activityItems.map((item, i) => (
+                  <motion.div
+                    key={item.title}
+                    className="rounded-2xl border border-white/8 bg-slate-950/40 p-4"
+                    initial={false}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, delay: i * 0.04 }}
                   >
-                    <div className="h-2 w-2 rounded-full" style={{ backgroundColor: task.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-slate-700">{task.agent}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                        task.status === "Running" ? "bg-blue-50 text-blue-600" :
-                        task.status === "Complete" ? "bg-emerald-50 text-emerald-600" :
-                        "bg-slate-50 text-slate-400"
-                      }`}>
-                        {task.status}
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-white">{item.title}</p>
+                      <span className="rounded-full bg-white/6 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+                        {item.status}
                       </span>
                     </div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{task.action}</div>
-                    {task.progress > 0 && (
-                      <div className="mt-1.5 h-1 w-full rounded-full bg-slate-100 overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: task.color }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${task.progress}%` }}
-                          transition={{ delay: 0.6 + i * 0.1, duration: 0.8 }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
+                    <p className="mt-2 text-sm leading-6 text-slate-400">{item.detail}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      </motion.div>
     </div>
   );
 }
