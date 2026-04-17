@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import type { Tier } from "./TierSelector";
 import LivingDashboard from "./LivingDashboard";
 
@@ -328,262 +328,488 @@ function SmartAutomationDashboard() {
   );
 }
 
+type AgentChannel = {
+  id: string;
+  name: string;
+  subtitle: string;
+  headerBg: string;
+  accent: string;
+  iconPath: string;
+};
+
+const AGENT_CHANNELS: Record<string, AgentChannel> = {
+  acropora: {
+    id: "acropora",
+    name: "AcroporaAgent",
+    subtitle: "Executive operations assistant",
+    headerBg: "#0d6b63",
+    accent: "#0d6b63",
+    iconPath:
+      "M9.75 17L9 20l-1 1h8l-1-1-.75-3M4 6.5A2.5 2.5 0 016.5 4h11A2.5 2.5 0 0120 6.5v7A2.5 2.5 0 0117.5 16h-11A2.5 2.5 0 014 13.5v-7z",
+  },
+  finance: {
+    id: "finance",
+    name: "CFO + COO",
+    subtitle: "Finance Ops · Contract Review",
+    headerBg: "#1e3a8a",
+    accent: "#1e3a8a",
+    iconPath:
+      "M9 17V7a2 2 0 012-2h2a2 2 0 012 2v10M5 9h14a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2z",
+  },
+};
+
+type CardItem = { name: string; detail: string; tag: string };
+type InlineCardData = { title: string; accent: string; items: CardItem[] };
+
+type AgentStep =
+  | { kind: "message"; from: "agent" | "user"; text: string; time: string; card?: InlineCardData; delay: number }
+  | { kind: "voice"; from: "user"; transcript: string; duration: string; time: string; delay: number }
+  | { kind: "typing"; delay: number }
+  | { kind: "channel-switch"; to: string; delay: number };
+
+const AGENT_STEPS: AgentStep[] = [
+  {
+    kind: "message",
+    from: "agent",
+    text: "This is what your calendar looks like. You have 5 meetings today at 8:30 AM, 10:00 AM, 12:30 PM, 2:00 PM, and 4:15 PM.",
+    time: "6:50 AM",
+    delay: 400,
+  },
+  {
+    kind: "message",
+    from: "agent",
+    text: "I reviewed your census and it looks like Building Main Facility dropped to 90% occupancy yesterday, with 125 residents. I see chatter in Slack and Teams that the intake coordinator was fired. Should I start an email to Admin?",
+    time: "7:03 AM",
+    delay: 1600,
+  },
+  { kind: "message", from: "user", text: "Yes.", time: "7:05 AM", delay: 1400 },
+  {
+    kind: "message",
+    from: "agent",
+    text: "I have been researching your idea about a tech spinoff and this is what I found. Should I turn it into a podcast and send it to your Spotify for your morning walk?",
+    time: "7:11 AM",
+    delay: 1400,
+  },
+  { kind: "message", from: "user", text: "Yes.", time: "7:12 AM", delay: 1000 },
+  {
+    kind: "message",
+    from: "agent",
+    text: "Sending to Spotify — your morning briefing is queued for the walk.",
+    time: "7:12 AM",
+    delay: 800,
+  },
+  {
+    kind: "voice",
+    from: "user",
+    transcript: "I am having a survey in main building today, show me all the deficiencies in Care plans.",
+    duration: "0:07",
+    time: "9:14 AM",
+    delay: 1800,
+  },
+  { kind: "typing", delay: 800 },
+  {
+    kind: "message",
+    from: "agent",
+    text: "Here's what I found in PCC:",
+    time: "9:14 AM",
+    delay: 900,
+    card: {
+      title: "Care Plan Deficiencies · 3 found",
+      accent: "#ef4444",
+      items: [
+        { name: "John Smith", detail: "Wound care plan not updated", tag: "14d overdue" },
+        { name: "Maria Hernandez", detail: "Fall risk reassessment missing", tag: "due yesterday" },
+        { name: "Robert Chen", detail: "Medication review signature absent", tag: "unsigned" },
+      ],
+    },
+  },
+  { kind: "channel-switch", to: "finance", delay: 1400 },
+  {
+    kind: "message",
+    from: "agent",
+    text: "Overnight I found a few variances in contracts we're working on with a new supplier for ancillary services and outsourced agency staff.",
+    time: "7:42 AM",
+    delay: 1300,
+    card: {
+      title: "Contract Variances · 3 flagged",
+      accent: "#f59e0b",
+      items: [
+        { name: "Vendor Alpha", detail: "Agency rate +$42K vs RFP", tag: "over budget" },
+        { name: "Vendor Beta", detail: "Missing exclusivity clause", tag: "risk" },
+        { name: "Vendor Gamma", detail: "Auto-renewal terms unclear", tag: "review" },
+      ],
+    },
+  },
+];
+
+type AnnotatedStep = AgentStep & { channel: string };
+const ANNOTATED_AGENT_STEPS: AnnotatedStep[] = (() => {
+  let channel = "acropora";
+  return AGENT_STEPS.map((step) => {
+    if (step.kind === "channel-switch") channel = step.to;
+    return { ...step, channel };
+  });
+})();
+
+function InlineCard({ data }: { data: InlineCardData }) {
+  return (
+    <div className="mt-2 overflow-hidden rounded-xl border border-slate-200/70 bg-white">
+      <div
+        className="border-l-[3px] px-3 py-2"
+        style={{ borderLeftColor: data.accent, backgroundColor: `${data.accent}0a` }}
+      >
+        <div className="text-[11px] font-semibold text-slate-700">{data.title}</div>
+      </div>
+      <div className="divide-y divide-slate-100">
+        {data.items.map((item, i) => (
+          <div key={i} className="flex items-center justify-between gap-2 px-3 py-2">
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[11px] font-medium text-slate-800">{item.name}</div>
+              <div className="truncate text-[10px] text-slate-500">{item.detail}</div>
+            </div>
+            <span
+              className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold"
+              style={{ backgroundColor: `${data.accent}15`, color: data.accent }}
+            >
+              {item.tag}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function VoiceNoteBubble({
+  transcript,
+  duration,
+  time,
+  accent,
+}: {
+  transcript: string;
+  duration: string;
+  time: string;
+  accent: string;
+}) {
+  return (
+    <div className="max-w-[88%] rounded-[1.25rem] rounded-tr-md bg-[#d9fdd3] px-3 py-2.5 shadow-sm sm:max-w-[80%]">
+      <div className="flex items-center gap-2.5">
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white"
+          style={{ backgroundColor: accent }}
+        >
+          <svg className="ml-0.5 h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+        <div className="flex h-7 flex-1 items-center gap-[2px]">
+          {Array.from({ length: 26 }).map((_, i) => {
+            const base = 3 + ((i * 5) % 11);
+            return (
+              <motion.div
+                key={i}
+                className="flex-1 rounded-full"
+                style={{ backgroundColor: `${accent}55`, minWidth: 2 }}
+                animate={{ height: [base, base + 8, base + 3, base + 10, base] }}
+                transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.04 }}
+              />
+            );
+          })}
+        </div>
+        <span className="shrink-0 text-[10px] font-medium text-slate-600">{duration}</span>
+      </div>
+      <p className="mt-2 text-[12px] italic leading-5 text-slate-600">&ldquo;{transcript}&rdquo;</p>
+      <p className="mt-1 text-right text-[10px] text-slate-400">{time}</p>
+    </div>
+  );
+}
+
+function TypingIndicator() {
+  return (
+    <div className="rounded-[1.25rem] rounded-tl-md bg-white px-4 py-3 shadow-sm">
+      <div className="flex items-center gap-1">
+        {[0, 1, 2].map((i) => (
+          <motion.span
+            key={i}
+            className="h-1.5 w-1.5 rounded-full bg-slate-400"
+            animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
+            transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PhoneStatusBar() {
+  return (
+    <div className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-3 pb-1 text-[11px] font-semibold text-slate-900">
+      <span>9:41</span>
+      <div className="flex items-center gap-1.5">
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="7" width="2" height="3" rx="0.5" />
+          <rect x="3" y="5" width="2" height="5" rx="0.5" />
+          <rect x="6" y="3" width="2" height="7" rx="0.5" />
+          <rect x="9" y="0" width="2" height="10" rx="0.5" />
+        </svg>
+        <svg width="14" height="10" viewBox="0 0 16 11" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+          <path d="M2 5c3-3 9-3 12 0" strokeLinecap="round" />
+          <path d="M4.5 7c2-2 5-2 7 0" strokeLinecap="round" />
+          <circle cx="8" cy="9.2" r="1" fill="currentColor" />
+        </svg>
+        <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="18" height="9" rx="2" />
+          <rect x="2" y="2" width="12" height="6" rx="1" fill="currentColor" />
+          <rect x="19.5" y="3.25" width="1.5" height="3.5" rx="0.5" fill="currentColor" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function PhoneInputBar({ accent }: { accent: string }) {
+  return (
+    <div className="flex shrink-0 items-center gap-2 border-t border-slate-200 bg-[#f0f2f5] px-2 py-2">
+      <button
+        type="button"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm"
+        aria-label="Attach"
+        tabIndex={-1}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
+        </svg>
+      </button>
+      <div className="flex flex-1 items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm">
+        <span className="text-[12px] text-slate-400">Message</span>
+        <svg className="ml-auto h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <button
+        type="button"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-colors"
+        style={{ backgroundColor: accent }}
+        aria-label="Record voice"
+        tabIndex={-1}
+      >
+        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3zm7 9a1 1 0 00-2 0 5 5 0 01-10 0 1 1 0 00-2 0 7 7 0 006 6.92V20H9a1 1 0 000 2h6a1 1 0 000-2h-2v-2.08A7 7 0 0019 11z" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 function AIOpsDashboard() {
-  const messages = [
-    {
-      from: "agent",
-      text: "This is what your calendar looks like. You have 5 meetings today at 8:30 AM, 10:00 AM, 12:30 PM, 2:00 PM, and 4:15 PM.",
-      time: "6:50 AM",
-    },
-    {
-      from: "agent",
-      text: "I reviewed your census and it looks like Building Main Facility dropped to 90% occupancy yesterday, with 125 residents. I see chatter in Slack and Teams that the intake coordinator was fired. Should I start an email to Admin?",
-      time: "7:03 AM",
-    },
-    {
-      from: "user",
-      text: "Yes.",
-      time: "7:05 AM",
-    },
-    {
-      from: "agent",
-      text: "I have been researching your idea about a tech spinoff and this is what I found. Should I turn it into a podcast and send it to your Spotify for your morning walk?",
-      time: "7:11 AM",
-    },
-  ];
-
-  const scenes = [
-    {
-      id: "calendar",
-      focusLabel: "Current Focus",
-      focusTitle: "Calendar briefing assembled",
-      focusStatus: "Reviewing",
-      focusBody: "AcroporaAgent summarizes the day before the executive team logs in and flags schedule compression early.",
-      syncTime: "Last sync 6:52 AM",
-      automationCards: [
-        { label: "Meetings Today", value: "05", detail: "Stacked across operations, census review, and investor prep.", accent: "#38bdf8" },
-        { label: "First Briefing", value: "8:30", detail: "Leadership standup is first on deck this morning.", accent: "#22c55e" },
-        { label: "Focus Gaps", value: "02", detail: "Two open windows remain for urgent follow-up.", accent: "#f59e0b" },
-      ],
-      activityItems: [
-        { title: "Calendar parsed", detail: "Pulled meetings from Outlook and grouped by decision priority.", status: "Live" },
-        { title: "Travel buffers checked", detail: "No site-to-site conflict detected for the afternoon meetings.", status: "Clear" },
-        { title: "Executive brief drafted", detail: "Morning summary prepared for approval and send-out.", status: "Ready" },
-      ],
-    },
-    {
-      id: "occupancy",
-      focusLabel: "Risk Signal",
-      focusTitle: "Occupancy dipped at Building Main Facility",
-      focusStatus: "Escalation Suggested",
-      focusBody: "The agent correlates census movement with team chatter and surfaces the likely operational cause before occupancy falls further.",
-      syncTime: "Last sync 7:04 AM",
-      automationCards: [
-        { label: "Occupancy", value: "90%", detail: "Building Main Facility closed the day below target occupancy.", accent: "#f97316" },
-        { label: "Resident Count", value: "125", detail: "Down from the previous day and outside the normal band.", accent: "#38bdf8" },
-        { label: "Source Alerts", value: "02", detail: "Slack and Teams both reference intake disruption.", accent: "#ef4444" },
-      ],
-      activityItems: [
-        { title: "Census anomaly detected", detail: "Yesterday's move-outs exceeded normal intake replacement velocity.", status: "Flagged" },
-        { title: "Internal chatter matched", detail: "Staff communication points to intake coordinator termination.", status: "Correlated" },
-        { title: "Admin draft recommended", detail: "Escalation path prepared but still waiting on approval.", status: "Pending" },
-      ],
-    },
-    {
-      id: "approval",
-      focusLabel: "Action Queue",
-      focusTitle: "Admin escalation approved",
-      focusStatus: "Queued",
-      focusBody: "Once leadership approves, AcroporaAgent moves directly from signal detection to drafted communication with the necessary context attached.",
-      syncTime: "Last sync 7:06 AM",
-      automationCards: [
-        { label: "Draft Status", value: "Ready", detail: "Email to Admin is staged with occupancy data and staffing context.", accent: "#22c55e" },
-        { label: "Recipients", value: "03", detail: "Admin, COO, and regional operations included in the draft.", accent: "#38bdf8" },
-        { label: "Attachments", value: "02", detail: "Census trend and message excerpts attached for context.", accent: "#a78bfa" },
-      ],
-      activityItems: [
-        { title: "Approval captured", detail: "Executive response logged and linked to the escalation request.", status: "Logged" },
-        { title: "Email draft assembled", detail: "Occupancy trend, resident count, and staffing cause included in one thread.", status: "Ready" },
-        { title: "Follow-up timer armed", detail: "Agent will check for Admin response before the noon review.", status: "Scheduled" },
-      ],
-    },
-    {
-      id: "podcast",
-      focusLabel: "New Opportunity",
-      focusTitle: "Tech spinoff research prepared",
-      focusStatus: "Ready To Send",
-      focusBody: "AcroporaAgent pivots from operations into research synthesis, then offers the best delivery format for the executive's routine.",
-      syncTime: "Last sync 7:12 AM",
-      automationCards: [
-        { label: "Research Memos", value: "04", detail: "Market comps, buyer interest, compliance, and staffing model summarized.", accent: "#38bdf8" },
-        { label: "Audio Draft", value: "08m", detail: "Estimated podcast runtime for a morning walk briefing.", accent: "#22c55e" },
-        { label: "Delivery", value: "Spotify", detail: "Ready to publish privately to the executive listening feed.", accent: "#f59e0b" },
-      ],
-      activityItems: [
-        { title: "Spinoff research synthesized", detail: "Combined internal notes with market and operational benchmarks.", status: "Compiled" },
-        { title: "Audio outline generated", detail: "Structured as a short narrative briefing with next-step recommendations.", status: "Drafted" },
-        { title: "Distribution ready", detail: "Private Spotify upload can be triggered after one response.", status: "Waiting" },
-      ],
-    },
-  ];
-
-  const [visibleMessageCount, setVisibleMessageCount] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [ended, setEnded] = useState(false);
+  const chatBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const delay = visibleMessageCount < messages.length ? 2400 : 5200;
-    const timeout = window.setTimeout(() => {
-      setVisibleMessageCount((current) => (current < messages.length ? current + 1 : 1));
-    }, delay);
+    if (ended) return;
+    if (visibleCount >= ANNOTATED_AGENT_STEPS.length) {
+      const t = window.setTimeout(() => setEnded(true), 1200);
+      return () => window.clearTimeout(t);
+    }
+    const step = ANNOTATED_AGENT_STEPS[visibleCount];
+    const t = window.setTimeout(() => setVisibleCount((c) => c + 1), step.delay);
+    return () => window.clearTimeout(t);
+  }, [visibleCount, ended]);
 
-    return () => window.clearTimeout(timeout);
-  }, [messages.length, visibleMessageCount]);
+  const replay = () => {
+    setEnded(false);
+    setVisibleCount(0);
+  };
 
-  const currentScene =
-    visibleMessageCount >= 4
-      ? scenes[3]
-      : visibleMessageCount >= 3
-        ? scenes[2]
-        : visibleMessageCount >= 2
-          ? scenes[1]
-          : scenes[0];
+  const currentChannelId = (() => {
+    for (let i = visibleCount - 1; i >= 0; i--) {
+      const s = ANNOTATED_AGENT_STEPS[i];
+      if (s.kind === "channel-switch") return s.to;
+    }
+    return "acropora";
+  })();
+  const currentChannel = AGENT_CHANNELS[currentChannelId];
 
-  const visibleMessages = messages.slice(0, visibleMessageCount);
+  const visibleForChannel = ANNOTATED_AGENT_STEPS.slice(0, visibleCount).filter(
+    (s) => s.channel === currentChannelId && s.kind !== "channel-switch",
+  );
+
+  const renderableSteps = visibleForChannel.filter((s, i, arr) => {
+    if (s.kind !== "typing") return true;
+    return i === arr.length - 1;
+  });
+
+  useEffect(() => {
+    const el = chatBodyRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [visibleCount, currentChannelId]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-      <motion.div
-        className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 shadow-[0_40px_120px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 sm:px-6">
-          <div className="flex gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-rose-400/90" />
-            <div className="h-2.5 w-2.5 rounded-full bg-amber-300/90" />
-            <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/90" />
-          </div>
-          <div className="min-w-0 flex-1 rounded-full border border-white/10 bg-slate-900/80 px-4 py-2">
-            <span className="block truncate text-[11px] text-slate-400 sm:text-xs">agent.acropora.ai/workspace</span>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200 sm:text-[11px]">
-            <span className="h-2 w-2 rounded-full bg-emerald-300" />
-            AcroporaAgent Online
-          </div>
-        </div>
+    <div className="relative mx-auto w-full max-w-5xl px-4 sm:px-6">
+      <div className="relative flex flex-col items-center">
+        <motion.div
+          className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[120%] w-[90%] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-[100px] transition-colors duration-500"
+          style={{ backgroundColor: currentChannel.accent }}
+          animate={{ opacity: [0.4, 0.55, 0.4] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        />
 
-        <div className="grid gap-5 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.85fr)] lg:p-8">
-          <motion.div
-            className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#f3ecdf] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.55, delay: 0.1 }}
-          >
-            <div className="flex items-center gap-3 bg-[#0d6b63] px-4 py-4 sm:px-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400/20 text-emerald-100 ring-1 ring-inset ring-white/15">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M4 6.5A2.5 2.5 0 016.5 4h11A2.5 2.5 0 0120 6.5v7A2.5 2.5 0 0117.5 16h-11A2.5 2.5 0 014 13.5v-7z" />
-                </svg>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-base font-semibold text-white sm:text-lg">AcroporaAgent</div>
-                <div className="text-[11px] uppercase tracking-[0.22em] text-emerald-100/80">Executive operations assistant</div>
-              </div>
-              <div className="rounded-full bg-emerald-300/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
-                Live
-              </div>
-            </div>
+        <motion.div
+          className="relative w-full"
+          style={{ maxWidth: "340px" }}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="relative rounded-[2.75rem] bg-gradient-to-b from-slate-700 via-slate-900 to-slate-950 p-[10px] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.75)] ring-1 ring-white/10">
+            <div
+              className="relative flex flex-col overflow-hidden rounded-[2.25rem] bg-[#efeae2]"
+              style={{ height: "620px" }}
+            >
+              <div className="absolute left-1/2 top-2 z-30 h-6 w-28 -translate-x-1/2 rounded-full bg-slate-950" />
 
-            <div className="space-y-3 px-3 py-4 sm:px-5 sm:py-5" style={{ minHeight: "420px" }}>
-              {visibleMessages.map((msg, i) => (
+              <PhoneStatusBar />
+
+              <AnimatePresence mode="wait">
                 <motion.div
-                  key={`${msg.time}-${i}`}
-                  className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
-                  initial={i === visibleMessages.length - 1 ? { opacity: 0, y: 14, scale: 0.98 } : false}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.28 }}
-                  layout="position"
+                  key={currentChannel.id}
+                  className="flex shrink-0 items-center gap-3 px-3 py-3"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.35 }}
+                  style={{ backgroundColor: currentChannel.headerBg }}
                 >
-                  <div
-                    className={`max-w-[88%] rounded-[1.25rem] px-4 py-3 shadow-sm sm:max-w-[80%] ${
-                      msg.from === "user"
-                        ? "rounded-tr-md bg-[#d9fdd3] text-slate-900"
-                        : "rounded-tl-md bg-white text-slate-800"
-                    }`}
-                  >
-                    <p className="whitespace-pre-line text-[13px] leading-6 sm:text-sm">{msg.text}</p>
-                    <p className="mt-2 text-right text-[10px] text-slate-400">{msg.time}</p>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-inset ring-white/15">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={currentChannel.iconPath} />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[14px] font-semibold text-white">{currentChannel.name}</div>
+                    <div className="truncate text-[10px] uppercase tracking-[0.2em] text-white/75">{currentChannel.subtitle}</div>
+                  </div>
+                  <div className="rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white">
+                    Live
                   </div>
                 </motion.div>
-              ))}
-            </div>
-          </motion.div>
+              </AnimatePresence>
 
-          <motion.div
-            className="flex flex-col gap-4 sm:gap-5"
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.55, delay: 0.2 }}
-          >
-            <div className="rounded-[1.6rem] border border-cyan-400/20 bg-cyan-400/10 p-4 sm:p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100/80">{currentScene.focusLabel}</p>
-                  <h3 className="mt-2 text-xl font-semibold text-white">{currentScene.focusTitle}</h3>
-                </div>
-                <div className="rounded-full border border-cyan-300/20 bg-slate-950/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
-                  {currentScene.focusStatus}
+              <div
+                ref={chatBodyRef}
+                className="scrollbar-hide flex-1 overflow-y-auto"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px)",
+                  backgroundSize: "16px 16px",
+                }}
+              >
+                <div className="space-y-2.5 px-3 py-3">
+                  <AnimatePresence mode="popLayout">
+                    {renderableSteps.map((step, i) => {
+                      const keyBase = `${currentChannel.id}-${i}`;
+                      if (step.kind === "channel-switch") return null;
+                      if (step.kind === "typing") {
+                        return (
+                          <motion.div
+                            key={`typing-${keyBase}`}
+                            className="flex justify-start"
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            layout="position"
+                          >
+                            <TypingIndicator />
+                          </motion.div>
+                        );
+                      }
+
+                      if (step.kind === "voice") {
+                        return (
+                          <motion.div
+                            key={`voice-${keyBase}`}
+                            className="flex justify-end"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.28 }}
+                            layout="position"
+                          >
+                            <VoiceNoteBubble
+                              transcript={step.transcript}
+                              duration={step.duration}
+                              time={step.time}
+                              accent={currentChannel.accent}
+                            />
+                          </motion.div>
+                        );
+                      }
+
+                      return (
+                        <motion.div
+                          key={`msg-${keyBase}`}
+                          className={`flex ${step.from === "user" ? "justify-end" : "justify-start"}`}
+                          initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.28 }}
+                          layout="position"
+                        >
+                          <div
+                            className={`max-w-[88%] rounded-[1rem] px-3 py-2 shadow-sm ${
+                              step.from === "user"
+                                ? "rounded-tr-sm bg-[#d9fdd3] text-slate-900"
+                                : "rounded-tl-sm bg-white text-slate-800"
+                            }`}
+                          >
+                            <p className="whitespace-pre-line text-[12px] leading-5">{step.text}</p>
+                            {step.card && <InlineCard data={step.card} />}
+                            <p className="mt-1 text-right text-[9px] text-slate-400">{step.time}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
                 </div>
               </div>
-              <p className="mt-3 text-sm leading-6 text-slate-300">
-                {currentScene.focusBody}
-              </p>
-            </div>
 
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-              {currentScene.automationCards.map((card, i) => (
-                <motion.div
-                  key={card.label}
-                  className="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-4"
-                  initial={false}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.22, delay: i * 0.04 }}
+              <PhoneInputBar accent={currentChannel.accent} />
+            </div>
+          </div>
+        </motion.div>
+
+        <AnimatePresence>
+          {ended && (
+            <motion.div
+              key="play-again"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.3 }}
+              className="mt-8 flex justify-center"
+            >
+              <button
+                onClick={replay}
+                className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:border-white/35 hover:bg-white/15"
+              >
+                <svg
+                  className="h-4 w-4 text-emerald-300 transition-transform duration-500 group-hover:-rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
                 >
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
-                  <div className="mt-3 text-3xl font-semibold text-white" style={{ color: card.accent }}>{card.value}</div>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">{card.detail}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">Agent Activity</h3>
-                <span className="text-[11px] text-slate-500">{currentScene.syncTime}</span>
-              </div>
-              <div className="mt-4 space-y-3">
-                {currentScene.activityItems.map((item, i) => (
-                  <motion.div
-                    key={item.title}
-                    className="rounded-2xl border border-white/8 bg-slate-950/40 p-4"
-                    initial={false}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.22, delay: i * 0.04 }}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-white">{item.title}</p>
-                      <span className="rounded-full bg-white/6 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
-                        {item.status}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-400">{item.detail}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </motion.div>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Play again
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -617,9 +843,9 @@ export default function TierDashboard({ tier }: TierDashboardProps) {
       subheading: "Intelligent monitoring and anomaly detection with human oversight. AI assists — you stay in control.",
     },
     aiops: {
-      badge: "AI Operations",
-      heading: "Your business, on autopilot.",
-      subheading: "Autonomous agents that handle email triage, reporting, monitoring, and more — with full audit trails and security.",
+      badge: "The Acropora Agent",
+      heading: "Your business at your fingertips.",
+      subheading: "One agent, every channel. Voice notes, chats, approvals — handled in the conversations your team already uses.",
     },
   };
 
@@ -644,7 +870,11 @@ export default function TierDashboard({ tier }: TierDashboardProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mx-auto max-w-3xl text-center mb-10 sm:mb-14"
+          className={`mx-auto text-center ${
+            tier.id === "aiops"
+              ? "max-w-3xl lg:max-w-5xl mb-6 sm:mb-8 lg:mb-10"
+              : "max-w-3xl mb-10 sm:mb-14"
+          }`}
         >
           <span
             className="inline-flex items-center rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] backdrop-blur-sm"
@@ -656,12 +886,23 @@ export default function TierDashboard({ tier }: TierDashboardProps) {
           >
             {config.badge}
           </span>
-          <h2 className="mt-6 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            {config.heading}
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-400 sm:text-lg">
-            {config.subheading}
-          </p>
+          {tier.id === "aiops" ? (
+            <h2 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl lg:whitespace-nowrap">
+              Your business{" "}
+              <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-emerald-200 bg-clip-text text-transparent">
+                at your fingertips.
+              </span>
+            </h2>
+          ) : (
+            <h2 className="mt-6 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+              {config.heading}
+            </h2>
+          )}
+          {tier.id !== "aiops" && (
+            <p className="mt-4 text-base leading-relaxed text-slate-400 sm:text-lg">
+              {config.subheading}
+            </p>
+          )}
         </motion.div>
 
         {dashboardComponents[tier.id]}

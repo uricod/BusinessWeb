@@ -9,48 +9,62 @@ export default function ChaosToOrderExperience() {
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"],
+    offset: ["start start", "end start"],
   });
 
-  // === Scroll-derived transforms ===
+  // Canvas animation plays through the first 60% of section scroll
+  const canvasProgress = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
+  const canvasOpacity = useTransform(scrollYProgress, [0.55, 0.75], [1, 0.35]);
 
-  // Canvas progress: 0-1 maps to chaos → convergence → settled
-  const canvasProgress = useTransform(scrollYProgress, [0, 0.85], [0, 1]);
-  const canvasOpacity = useTransform(scrollYProgress, [0.75, 0.95], [1, 0.42]);
-  // Background: dark navy → light
-  const bgR = useTransform(scrollYProgress, [0, 0.55, 0.95], [15, 30, 240]);
-  const bgG = useTransform(scrollYProgress, [0, 0.55, 0.95], [23, 45, 247]);
-  const bgB = useTransform(scrollYProgress, [0, 0.55, 0.95], [42, 80, 252]);
+  // Overall overlay fades out near the end so Proven Operator Impact reveals
+  // cleanly instead of sitting behind a faded chaos-end-state.
+  const overlayOpacity = useTransform(scrollYProgress, [0.7, 0.95], [1, 0]);
+
+  // Background color: dark navy → near-white
+  const bgR = useTransform(scrollYProgress, [0, 0.35, 0.75], [15, 30, 240]);
+  const bgG = useTransform(scrollYProgress, [0, 0.35, 0.75], [23, 45, 247]);
+  const bgB = useTransform(scrollYProgress, [0, 0.35, 0.75], [42, 80, 252]);
   const bgColor = useTransform(
     [bgR, bgG, bgB] as const,
     ([r, g, b]) => `rgb(${r}, ${g}, ${b})`
   );
 
-  // Tagline: fades in through chaos, holds longer, then exits near end
-  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.12, 0.6, 0.85], [0, 1, 1, 0]);
-  const taglineBlur = useTransform(scrollYProgress, [0.03, 0.12], [12, 0]);
+  // Tagline
+  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.1, 0.5, 0.7], [0, 1, 1, 0]);
+  const taglineBlur = useTransform(scrollYProgress, [0.03, 0.1], [12, 0]);
   const taglineFilter = useTransform(taglineBlur, (v) => `blur(${v}px)`);
-  const taglineY = useTransform(scrollYProgress, [0.03, 0.12], [30, 0]);
+  const taglineY = useTransform(scrollYProgress, [0.03, 0.1], [30, 0]);
 
-  // Scroll indicator: visible only at start
-  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
-  const heroArrowOpacity = useTransform(scrollYProgress, [0.15, 0.22, 0.65, 0.85], [0, 1, 1, 0]);
+  // Arrows
+  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.06], [1, 0]);
+  const heroArrowOpacity = useTransform(scrollYProgress, [0.12, 0.2, 0.55, 0.72], [0, 1, 1, 0]);
 
-  // Hot gradient orbs fade out
-  const hotOrbOpacity = useTransform(scrollYProgress, [0, 0.45], [1, 0]);
-  // Cool gradient orbs fade in
-  const coolOrbOpacity = useTransform(scrollYProgress, [0.4, 0.9], [0, 0.45]);
+  // Orbs
+  const hotOrbOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const coolOrbOpacity = useTransform(scrollYProgress, [0.25, 0.7], [0, 0.45]);
+
+  // Disable pointer events on fixed arrows when invisible so they never block
+  // clicks on Proven Operator Impact below.
+  const heroArrowPE = useTransform(heroArrowOpacity, (v) => (v > 0.05 ? "auto" : "none"));
+  const scrollIndicatorPE = useTransform(scrollIndicatorOpacity, (v) => (v > 0.05 ? "auto" : "none"));
 
   return (
-    <section id="top" ref={containerRef} className="h-[110vh] sm:h-[120vh]">
-      <div className="sticky top-0 h-svh overflow-hidden sm:h-screen">
-        {/* Layer 0: Background color */}
+    <section
+      id="top"
+      ref={containerRef}
+      className="relative h-svh sm:h-screen"
+    >
+      {/* Fixed chaos overlay — pinned to viewport, fades out as section ends */}
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{ opacity: overlayOpacity }}
+      >
         <motion.div
           className="absolute inset-0"
           style={{ backgroundColor: bgColor }}
         />
 
-        {/* Hot gradient orbs (chaos phase) */}
         <motion.div className="absolute inset-0" style={{ opacity: hotOrbOpacity }}>
           <div className="absolute top-[10%] left-[15%] h-[250px] w-[250px] sm:h-[500px] sm:w-[500px] rounded-full bg-[rgba(249,115,22,0.15)] blur-[80px] sm:blur-[120px]" />
           <div className="absolute top-[40%] right-[10%] h-[200px] w-[200px] sm:h-[400px] sm:w-[400px] rounded-full bg-[rgba(239,68,68,0.12)] blur-[60px] sm:blur-[100px]" />
@@ -58,18 +72,15 @@ export default function ChaosToOrderExperience() {
           <div className="absolute top-[60%] right-[30%] h-[120px] w-[120px] sm:h-[200px] sm:w-[200px] rounded-full bg-[rgba(251,191,36,0.12)] blur-[40px] sm:blur-[60px]" />
         </motion.div>
 
-        {/* Cool gradient orbs (dashboard phase) */}
         <motion.div className="absolute inset-0" style={{ opacity: coolOrbOpacity }}>
           <div className="absolute top-[20%] left-[20%] h-[200px] w-[200px] sm:h-[400px] sm:w-[400px] rounded-full bg-ocean-500/8 blur-[80px] sm:blur-[120px]" />
           <div className="absolute bottom-[20%] right-[20%] h-[150px] w-[150px] sm:h-[300px] sm:w-[300px] rounded-full bg-[rgba(14,165,233,0.06)] blur-[60px] sm:blur-[100px]" />
         </motion.div>
 
-        {/* Layer 1: ChaosCanvas */}
         <motion.div className="absolute inset-0" style={{ opacity: canvasOpacity }}>
           <ChaosCanvas scrollProgress={canvasProgress} />
         </motion.div>
 
-        {/* Layer 2: Tagline overlay */}
         <motion.div
           className="absolute inset-0 flex flex-col items-center justify-center px-4"
           style={{
@@ -102,51 +113,62 @@ export default function ChaosToOrderExperience() {
             Scroll for results
           </motion.p>
         </motion.div>
+      </motion.div>
 
-        <motion.a
-          href="#proven-impact"
-          aria-label="Scroll to Proven Operator Impact"
-          className="absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-white/55 transition-colors hover:text-white/80"
-          style={{ opacity: heroArrowOpacity }}
+      {/* Fixed "See results" arrow */}
+      <motion.a
+        href="#proven-impact"
+        onClick={(e) => {
+          e.preventDefault();
+          const target = document.getElementById("proven-impact");
+          if (!target) return;
+          const prevBehavior = document.documentElement.style.scrollBehavior;
+          document.documentElement.style.scrollBehavior = "auto";
+          target.scrollIntoView({ block: "start" });
+          document.documentElement.style.scrollBehavior = prevBehavior;
+          history.replaceState(null, "", "#proven-impact");
+        }}
+        aria-label="Scroll to Proven Operator Impact"
+        className="fixed bottom-20 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-white/55 transition-colors hover:text-white/80"
+        style={{ opacity: heroArrowOpacity, pointerEvents: heroArrowPE }}
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-[0.28em]">
+          See results
+        </span>
+        <motion.svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <span className="text-[11px] font-semibold uppercase tracking-[0.28em]">
-            See results
-          </span>
-          <motion.svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 9l-7 7-7-7" />
-          </motion.svg>
-        </motion.a>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 9l-7 7-7-7" />
+        </motion.svg>
+      </motion.a>
 
-        {/* Layer 3: Initial scroll indicator */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-          style={{ opacity: scrollIndicatorOpacity }}
+      {/* Initial scroll indicator */}
+      <motion.div
+        className="fixed bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2"
+        style={{ opacity: scrollIndicatorOpacity, pointerEvents: scrollIndicatorPE }}
+      >
+        <span className="text-xs font-medium tracking-widest text-white/40 uppercase">
+          Scroll
+        </span>
+        <motion.svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          className="text-white/40"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <span className="text-xs font-medium tracking-widest text-white/40 uppercase">
-            Scroll
-          </span>
-          <motion.svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            className="text-white/40"
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />
-          </motion.svg>
-        </motion.div>
-      </div>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />
+        </motion.svg>
+      </motion.div>
     </section>
   );
 }

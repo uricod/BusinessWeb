@@ -53,10 +53,11 @@ export default function TierSelector() {
 
   const handleSelect = (tierId: TierId) => {
     setSelectedTier(tierId);
-    // Scroll to content after a brief delay for animation
+    // Wait for selector collapse (mode="wait" exit ~200ms) so document height
+    // has settled before we scroll. Scrolling earlier overshoots the heading.
     setTimeout(() => {
       contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
+    }, 320);
   };
 
   const handleReset = () => {
@@ -69,9 +70,11 @@ export default function TierSelector() {
 
   const handleSwitch = (tierId: TierId) => {
     setSelectedTier(tierId);
+    // Content AnimatePresence mode="wait" — old exits ~200ms before new mounts.
+    // Scroll after the new content has mounted so contentRef points to it.
     setTimeout(() => {
       contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
+    }, 320);
   };
 
   const selectedTierData = tiers.find((t) => t.id === selectedTier);
@@ -332,10 +335,10 @@ export default function TierSelector() {
           <motion.div
             key={selectedTier}
             ref={contentRef}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20, transition: { duration: 0.25 } }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             <TierDashboard tier={selectedTierData} />
             <TierCaseStudies tierId={selectedTier} />
