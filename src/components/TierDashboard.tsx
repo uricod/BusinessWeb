@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Tier } from "./TierSelector";
 import LivingDashboard from "./LivingDashboard";
 
@@ -373,30 +373,30 @@ const AGENT_STEPS: AgentStep[] = [
     from: "agent",
     text: "This is what your calendar looks like. You have 5 meetings today at 8:30 AM, 10:00 AM, 12:30 PM, 2:00 PM, and 4:15 PM.",
     time: "6:50 AM",
-    delay: 400,
+    delay: 500,
   },
   {
     kind: "message",
     from: "agent",
     text: "I reviewed your census and it looks like Building Main Facility dropped to 90% occupancy yesterday, with 125 residents. I see chatter in Slack and Teams that the intake coordinator was fired. Should I start an email to Admin?",
     time: "7:03 AM",
-    delay: 1600,
+    delay: 2500,
   },
-  { kind: "message", from: "user", text: "Yes.", time: "7:05 AM", delay: 1400 },
+  { kind: "message", from: "user", text: "Yes.", time: "7:05 AM", delay: 4400 },
   {
     kind: "message",
     from: "agent",
     text: "I have been researching your idea about a tech spinoff and this is what I found. Should I turn it into a podcast and send it to your Spotify for your morning walk?",
     time: "7:11 AM",
-    delay: 1400,
+    delay: 800,
   },
-  { kind: "message", from: "user", text: "Yes.", time: "7:12 AM", delay: 1000 },
+  { kind: "message", from: "user", text: "Yes.", time: "7:12 AM", delay: 3300 },
   {
     kind: "message",
     from: "agent",
     text: "Sending to Spotify — your morning briefing is queued for the walk.",
     time: "7:12 AM",
-    delay: 800,
+    delay: 700,
   },
   {
     kind: "voice",
@@ -404,9 +404,9 @@ const AGENT_STEPS: AgentStep[] = [
     transcript: "I am having a survey in main building today, show me all the deficiencies in Care plans.",
     duration: "0:07",
     time: "9:14 AM",
-    delay: 1800,
+    delay: 1700,
   },
-  { kind: "typing", delay: 800 },
+  { kind: "typing", delay: 1800 },
   {
     kind: "message",
     from: "agent",
@@ -423,7 +423,7 @@ const AGENT_STEPS: AgentStep[] = [
       ],
     },
   },
-  { kind: "channel-switch", to: "finance", delay: 1400 },
+  { kind: "channel-switch", to: "finance", delay: 1600 },
   {
     kind: "message",
     from: "agent",
@@ -541,6 +541,33 @@ function TypingIndicator() {
   );
 }
 
+function Typewriter({
+  text,
+  speed = 16,
+  onTick,
+}: {
+  text: string;
+  speed?: number;
+  onTick?: () => void;
+}) {
+  const [shown, setShown] = useState(0);
+
+  useEffect(() => {
+    setShown(0);
+  }, [text]);
+
+  useEffect(() => {
+    if (shown >= text.length) return;
+    const t = window.setTimeout(() => {
+      setShown((s) => s + 1);
+      onTick?.();
+    }, speed);
+    return () => window.clearTimeout(t);
+  }, [shown, text, speed, onTick]);
+
+  return <>{text.slice(0, shown)}</>;
+}
+
 function PhoneStatusBar() {
   return (
     <div className="relative z-10 flex shrink-0 items-center justify-between px-6 pt-3 pb-1 text-[11px] font-semibold text-slate-900">
@@ -645,6 +672,14 @@ function AIOpsDashboard() {
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [visibleCount, currentChannelId]);
+
+  // Instant scroll to bottom while text is typing so the growing bubble stays
+  // in view. Stable reference so Typewriter's effect doesn't re-run per render.
+  const scrollChatToBottom = useCallback(() => {
+    const el = chatBodyRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, []);
 
   return (
     <div className="relative mx-auto w-full max-w-5xl px-4 sm:px-6">
@@ -765,7 +800,9 @@ function AIOpsDashboard() {
                                 : "rounded-tl-sm bg-white text-slate-800"
                             }`}
                           >
-                            <p className="whitespace-pre-line text-[12px] leading-5">{step.text}</p>
+                            <p className="whitespace-pre-line text-[12px] leading-5">
+                              <Typewriter text={step.text} onTick={scrollChatToBottom} />
+                            </p>
                             {step.card && <InlineCard data={step.card} />}
                             <p className="mt-1 text-right text-[9px] text-slate-400">{step.time}</p>
                           </div>

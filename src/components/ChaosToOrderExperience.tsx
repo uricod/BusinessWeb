@@ -12,36 +12,37 @@ export default function ChaosToOrderExperience() {
     offset: ["start start", "end start"],
   });
 
-  // Canvas animation plays through the first 60% of section scroll
-  const canvasProgress = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
-  const canvasOpacity = useTransform(scrollYProgress, [0.55, 0.75], [1, 0.35]);
+  // Canvas animation plays through most of the section scroll
+  const canvasProgress = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
+  const canvasOpacity = useTransform(scrollYProgress, [0.8, 0.94], [1, 0.35]);
 
-  // Overall overlay fades out near the end so Proven Operator Impact reveals
-  // cleanly instead of sitting behind a faded chaos-end-state.
-  const overlayOpacity = useTransform(scrollYProgress, [0.7, 0.95], [1, 0]);
+  // Overall overlay stays fully opaque until the very end, then fades out in
+  // the final 5% of scroll. A wider fade window was letting the Proven Operator
+  // Impact section bleed through the semi-transparent overlay mid-scroll.
+  const overlayOpacity = useTransform(scrollYProgress, [0.95, 1.0], [1, 0]);
 
   // Background color: dark navy → near-white
-  const bgR = useTransform(scrollYProgress, [0, 0.35, 0.75], [15, 30, 240]);
-  const bgG = useTransform(scrollYProgress, [0, 0.35, 0.75], [23, 45, 247]);
-  const bgB = useTransform(scrollYProgress, [0, 0.35, 0.75], [42, 80, 252]);
+  const bgR = useTransform(scrollYProgress, [0, 0.5, 0.9], [15, 30, 240]);
+  const bgG = useTransform(scrollYProgress, [0, 0.5, 0.9], [23, 45, 247]);
+  const bgB = useTransform(scrollYProgress, [0, 0.5, 0.9], [42, 80, 252]);
   const bgColor = useTransform(
     [bgR, bgG, bgB] as const,
     ([r, g, b]) => `rgb(${r}, ${g}, ${b})`
   );
 
   // Tagline
-  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.1, 0.5, 0.7], [0, 1, 1, 0]);
+  const taglineOpacity = useTransform(scrollYProgress, [0.03, 0.1, 0.7, 0.85], [0, 1, 1, 0]);
   const taglineBlur = useTransform(scrollYProgress, [0.03, 0.1], [12, 0]);
   const taglineFilter = useTransform(taglineBlur, (v) => `blur(${v}px)`);
   const taglineY = useTransform(scrollYProgress, [0.03, 0.1], [30, 0]);
 
   // Arrows
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.06], [1, 0]);
-  const heroArrowOpacity = useTransform(scrollYProgress, [0.12, 0.2, 0.55, 0.72], [0, 1, 1, 0]);
+  const heroArrowOpacity = useTransform(scrollYProgress, [0.12, 0.2, 0.75, 0.9], [0, 1, 1, 0]);
 
   // Orbs
-  const hotOrbOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-  const coolOrbOpacity = useTransform(scrollYProgress, [0.25, 0.7], [0, 0.45]);
+  const hotOrbOpacity = useTransform(scrollYProgress, [0, 0.45], [1, 0]);
+  const coolOrbOpacity = useTransform(scrollYProgress, [0.4, 0.85], [0, 0.45]);
 
   // Disable pointer events on fixed arrows when invisible so they never block
   // clicks on Proven Operator Impact below.
