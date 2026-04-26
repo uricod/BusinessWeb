@@ -629,223 +629,39 @@ function PhoneInputBar({ accent }: { accent: string }) {
 }
 
 function AIOpsDashboard() {
-  const [visibleCount, setVisibleCount] = useState(0);
-  const [ended, setEnded] = useState(false);
-  const chatBodyRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (ended) return;
-    if (visibleCount >= ANNOTATED_AGENT_STEPS.length) {
-      const t = window.setTimeout(() => setEnded(true), 1200);
-      return () => window.clearTimeout(t);
-    }
-    const step = ANNOTATED_AGENT_STEPS[visibleCount];
-    const t = window.setTimeout(() => setVisibleCount((c) => c + 1), step.delay);
-    return () => window.clearTimeout(t);
-  }, [visibleCount, ended]);
-
-  const replay = () => {
-    setEnded(false);
-    setVisibleCount(0);
-  };
-
-  const currentChannelId = (() => {
-    for (let i = visibleCount - 1; i >= 0; i--) {
-      const s = ANNOTATED_AGENT_STEPS[i];
-      if (s.kind === "channel-switch") return s.to;
-    }
-    return "acropora";
-  })();
-  const currentChannel = AGENT_CHANNELS[currentChannelId];
-
-  const visibleForChannel = ANNOTATED_AGENT_STEPS.slice(0, visibleCount).filter(
-    (s) => s.channel === currentChannelId && s.kind !== "channel-switch",
-  );
-
-  const renderableSteps = visibleForChannel.filter((s, i, arr) => {
-    if (s.kind !== "typing") return true;
-    return i === arr.length - 1;
-  });
-
-  useEffect(() => {
-    const el = chatBodyRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [visibleCount, currentChannelId]);
-
-  // Instant scroll to bottom while text is typing so the growing bubble stays
-  // in view. Stable reference so Typewriter's effect doesn't re-run per render.
-  const scrollChatToBottom = useCallback(() => {
-    const el = chatBodyRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-  }, []);
-
   return (
-    <div className="relative mx-auto w-full max-w-5xl px-4 sm:px-6">
-      <div className="relative flex flex-col items-center">
+    <div className="relative mx-auto w-full max-w-[1320px] px-4 sm:px-6">
+      <div className="relative">
         <motion.div
-          className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[120%] w-[90%] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-[100px] transition-colors duration-500"
-          style={{ backgroundColor: currentChannel.accent }}
-          animate={{ opacity: [0.4, 0.55, 0.4] }}
+          className="pointer-events-none absolute inset-x-[8%] top-1/2 -z-10 h-[78%] -translate-y-1/2 rounded-full bg-emerald-400/20 blur-[120px]"
+          animate={{ opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 4, repeat: Infinity }}
         />
 
         <motion.div
-          className="relative w-full"
-          style={{ maxWidth: "340px" }}
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
+          className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/80 shadow-[0_50px_120px_-20px_rgba(0,0,0,0.75)] ring-1 ring-white/10 backdrop-blur-sm sm:rounded-[2rem]"
         >
-          <div className="relative rounded-[2.75rem] bg-gradient-to-b from-slate-700 via-slate-900 to-slate-950 p-[10px] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.75)] ring-1 ring-white/10">
-            <div
-              className="relative flex flex-col overflow-hidden rounded-[2.25rem] bg-[#efeae2]"
-              style={{ height: "620px" }}
-            >
-              <div className="absolute left-1/2 top-2 z-30 h-6 w-28 -translate-x-1/2 rounded-full bg-slate-950" />
-
-              <PhoneStatusBar />
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentChannel.id}
-                  className="flex shrink-0 items-center gap-3 px-3 py-3"
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.35 }}
-                  style={{ backgroundColor: currentChannel.headerBg }}
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-inset ring-white/15">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={currentChannel.iconPath} />
-                    </svg>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[14px] font-semibold text-white">{currentChannel.name}</div>
-                    <div className="truncate text-[10px] uppercase tracking-[0.2em] text-white/75">{currentChannel.subtitle}</div>
-                  </div>
-                  <div className="rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white">
-                    Live
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              <div
-                ref={chatBodyRef}
-                className="scrollbar-hide flex-1 overflow-y-auto"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px)",
-                  backgroundSize: "16px 16px",
-                }}
-              >
-                <div className="space-y-2.5 px-3 py-3">
-                  <AnimatePresence mode="popLayout">
-                    {renderableSteps.map((step, i) => {
-                      const keyBase = `${currentChannel.id}-${i}`;
-                      if (step.kind === "channel-switch") return null;
-                      if (step.kind === "typing") {
-                        return (
-                          <motion.div
-                            key={`typing-${keyBase}`}
-                            className="flex justify-start"
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            layout="position"
-                          >
-                            <TypingIndicator />
-                          </motion.div>
-                        );
-                      }
-
-                      if (step.kind === "voice") {
-                        return (
-                          <motion.div
-                            key={`voice-${keyBase}`}
-                            className="flex justify-end"
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.28 }}
-                            layout="position"
-                          >
-                            <VoiceNoteBubble
-                              transcript={step.transcript}
-                              duration={step.duration}
-                              time={step.time}
-                              accent={currentChannel.accent}
-                            />
-                          </motion.div>
-                        );
-                      }
-
-                      return (
-                        <motion.div
-                          key={`msg-${keyBase}`}
-                          className={`flex ${step.from === "user" ? "justify-end" : "justify-start"}`}
-                          initial={{ opacity: 0, y: 14, scale: 0.98 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -6 }}
-                          transition={{ duration: 0.28 }}
-                          layout="position"
-                        >
-                          <div
-                            className={`max-w-[88%] rounded-[1rem] px-3 py-2 shadow-sm ${
-                              step.from === "user"
-                                ? "rounded-tr-sm bg-[#d9fdd3] text-slate-900"
-                                : "rounded-tl-sm bg-white text-slate-800"
-                            }`}
-                          >
-                            <p className="whitespace-pre-line text-[12px] leading-5">
-                              <Typewriter text={step.text} onTick={scrollChatToBottom} />
-                            </p>
-                            {step.card && <InlineCard data={step.card} />}
-                            <p className="mt-1 text-right text-[9px] text-slate-400">{step.time}</p>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              <PhoneInputBar accent={currentChannel.accent} />
-            </div>
+          <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.04] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300 sm:px-5">
+            <span>Live Agent Workspace</span>
+            <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-[10px] text-emerald-300 ring-1 ring-inset ring-emerald-300/20">
+              Scroll Inside
+            </span>
           </div>
+          <iframe
+            src="/acropora-agent-loop-standalone.html"
+            title="Acropora Agent Loop"
+            className="block w-full border-0 bg-[#0c1612]"
+            loading="lazy"
+            style={{ height: "clamp(28rem, 82svh, 54rem)" }}
+          />
         </motion.div>
 
-        <AnimatePresence>
-          {ended && (
-            <motion.div
-              key="play-again"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.3 }}
-              className="mt-8 flex justify-center"
-            >
-              <button
-                onClick={replay}
-                className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:border-white/35 hover:bg-white/15"
-              >
-                <svg
-                  className="h-4 w-4 text-emerald-300 transition-transform duration-500 group-hover:-rotate-180"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Play again
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <p className="mt-4 text-center text-sm text-slate-400 sm:text-base">
+          Full-size chat view with internal scrolling, tuned to stay readable on mobile and fill larger screens cleanly.
+        </p>
       </div>
     </div>
   );
@@ -880,9 +696,9 @@ export default function TierDashboard({ tier }: TierDashboardProps) {
       subheading: "Intelligent monitoring and anomaly detection with human oversight. AI assists — you stay in control.",
     },
     aiops: {
-      badge: "The Acropora Agent",
-      heading: "Your business at your fingertips.",
-      subheading: "One agent, every channel. Voice notes, chats, approvals — handled in the conversations your team already uses.",
+      badge: "",
+      heading: "",
+      subheading: "",
     },
   };
 
@@ -903,44 +719,31 @@ export default function TierDashboard({ tier }: TierDashboardProps) {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className={`mx-auto text-center ${
-            tier.id === "aiops"
-              ? "max-w-3xl lg:max-w-5xl mb-6 sm:mb-8 lg:mb-10"
-              : "max-w-3xl mb-10 sm:mb-14"
-          }`}
-        >
-          <span
-            className="inline-flex items-center rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] backdrop-blur-sm"
-            style={{
-              borderColor: `${tier.color}30`,
-              backgroundColor: `${tier.color}10`,
-              color: tier.color,
-            }}
+        {tier.id !== "aiops" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mx-auto mb-10 max-w-3xl text-center sm:mb-14"
           >
-            {config.badge}
-          </span>
-          {tier.id === "aiops" ? (
-            <h2 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl lg:whitespace-nowrap">
-              Your business{" "}
-              <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-emerald-200 bg-clip-text text-transparent">
-                at your fingertips.
-              </span>
-            </h2>
-          ) : (
+            <span
+              className="inline-flex items-center rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] backdrop-blur-sm"
+              style={{
+                borderColor: `${tier.color}30`,
+                backgroundColor: `${tier.color}10`,
+                color: tier.color,
+              }}
+            >
+              {config.badge}
+            </span>
             <h2 className="mt-6 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
               {config.heading}
             </h2>
-          )}
-          {tier.id !== "aiops" && (
             <p className="mt-4 text-base leading-relaxed text-slate-400 sm:text-lg">
               {config.subheading}
             </p>
-          )}
-        </motion.div>
+          </motion.div>
+        )}
 
         {dashboardComponents[tier.id]}
       </div>

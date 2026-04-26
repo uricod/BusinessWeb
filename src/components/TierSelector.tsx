@@ -24,20 +24,6 @@ export const tiers: Tier[] = [
     color: "#fbbf24",
   },
   {
-    id: "visibility",
-    name: "Total Visibility",
-    tagline: "Executive dashboards & analytics. See everything.",
-    icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-    color: "#38bdf8",
-  },
-  {
-    id: "automation",
-    name: "Smart Automation",
-    tagline: "AI that assists. You stay in control.",
-    icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7",
-    color: "#a78bfa",
-  },
-  {
     id: "aiops",
     name: "AI Operations",
     tagline: "Autonomous agents running your business.",
@@ -111,7 +97,7 @@ export default function TierSelector() {
               </span>
             </h2>
             <p className="mt-4 text-base text-slate-400 sm:text-lg">
-              From precision-built software to fully autonomous AI agents — we meet you where you are.
+              Start with precision-built software or go straight to autonomous AI operations.
             </p>
           </motion.div>
 
@@ -126,8 +112,8 @@ export default function TierSelector() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="mt-12"
               >
-                {/* Desktop: 4 columns */}
-                <div className="hidden md:grid md:grid-cols-4 gap-4">
+                {/* Desktop: 2 columns */}
+                <div className="hidden gap-4 md:grid md:grid-cols-2">
                   {tiers.map((tier, i) => (
                     <motion.button
                       key={tier.id}
@@ -288,7 +274,7 @@ export default function TierSelector() {
                   })}
                 </div>
 
-                {/* Mobile mini-nav: 2x2 grid */}
+                {/* Mobile mini-nav */}
                 <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-2 md:hidden">
                   {tiers.map((tier) => {
                     const isActive = tier.id === selectedTier;
@@ -364,7 +350,7 @@ export default function TierSelector() {
                   Explore Another Path
                 </motion.button>
                 <p className="mt-4 text-sm text-slate-500">
-                  See what we build across all four tracks
+                  Compare both tracks
                 </p>
               </div>
             </section>
