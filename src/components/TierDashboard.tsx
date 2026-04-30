@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Tier } from "./TierSelector";
 import LivingDashboard from "./LivingDashboard";
@@ -628,12 +628,48 @@ function PhoneInputBar({ accent }: { accent: string }) {
   );
 }
 
+type IndustryId = "nursing" | "homecare";
+
+const INDUSTRIES: {
+  id: IndustryId;
+  name: string;
+  shortName: string;
+  color: string;
+  src: string;
+  iconPath: string;
+}[] = [
+  {
+    id: "nursing",
+    name: "Nursing Homes",
+    shortName: "Nursing",
+    color: "#10b981",
+    src: "/acropora-agent-loop-standalone.html",
+    iconPath:
+      "M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01",
+  },
+  {
+    id: "homecare",
+    name: "Home Care",
+    shortName: "Home Care",
+    color: "#f472b6",
+    src: "/acropora-agent-loop-homecare.html",
+    iconPath:
+      "M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10M10 14h4",
+  },
+];
+
 function AIOpsDashboard() {
+  const [industry, setIndustry] = useState<IndustryId | null>(null);
+  const selected = INDUSTRIES.find((i) => i.id === industry);
+  const glowColor = selected?.color ?? "#10b981";
+  const workspaceHeight = "clamp(28rem, 82svh, 54rem)";
+
   return (
     <div className="relative mx-auto w-full max-w-[1320px] px-4 sm:px-6">
       <div className="relative">
         <motion.div
-          className="pointer-events-none absolute inset-x-[8%] top-1/2 -z-10 h-[78%] -translate-y-1/2 rounded-full bg-emerald-400/20 blur-[120px]"
+          className="pointer-events-none absolute inset-x-[8%] top-1/2 -z-10 h-[78%] -translate-y-1/2 rounded-full blur-[120px]"
+          style={{ backgroundColor: `${glowColor}33` }}
           animate={{ opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 4, repeat: Infinity }}
         />
@@ -644,23 +680,156 @@ function AIOpsDashboard() {
           transition={{ duration: 0.6 }}
           className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/80 shadow-[0_50px_120px_-20px_rgba(0,0,0,0.75)] ring-1 ring-white/10 backdrop-blur-sm sm:rounded-[2rem]"
         >
-          <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.04] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300 sm:px-5">
-            <span>Live Agent Workspace</span>
-            <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-[10px] text-emerald-300 ring-1 ring-inset ring-emerald-300/20">
-              Scroll Inside
-            </span>
+          {/* Header bar — same in both states, only content swaps */}
+          <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-white/[0.04] px-3 py-2.5 sm:px-5 sm:py-3">
+            {selected ? (
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className="inline-flex h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: selected.color, boxShadow: `0 0 8px ${selected.color}` }}
+                />
+                <span className="truncate text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300 sm:text-[11px] sm:tracking-[0.24em]">
+                  {selected.name} · Live Agent
+                </span>
+              </div>
+            ) : (
+              <span className="truncate text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300 sm:text-[11px] sm:tracking-[0.24em]">
+                Live Agent Workspace
+              </span>
+            )}
+            <div className="flex shrink-0 items-center gap-1.5">
+              {selected && (
+                <div className="flex items-center gap-1 rounded-full border border-white/10 bg-slate-900/60 p-0.5">
+                  {INDUSTRIES.map((ind) => {
+                    const isActive = ind.id === industry;
+                    return (
+                      <button
+                        key={ind.id}
+                        onClick={() => setIndustry(ind.id)}
+                        aria-pressed={isActive}
+                        className="rounded-full px-2 py-1 text-[10px] font-semibold transition-all sm:px-2.5"
+                        style={{
+                          backgroundColor: isActive ? ind.color : "transparent",
+                          color: isActive ? "#0f172a" : "#94a3b8",
+                        }}
+                        title={ind.name}
+                      >
+                        {ind.shortName}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <span className="hidden rounded-full bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300 ring-1 ring-inset ring-emerald-300/20 sm:inline">
+                Scroll Inside
+              </span>
+            </div>
           </div>
-          <iframe
-            src="/acropora-agent-loop-standalone.html"
-            title="Acropora Agent Loop"
-            className="block w-full border-0 bg-[#0c1612]"
-            loading="lazy"
-            style={{ height: "clamp(28rem, 82svh, 54rem)" }}
-          />
+
+          {/* Content area — fixed height; chooser OR iframe */}
+          {selected ? (
+            <iframe
+              key={industry}
+              src={selected.src}
+              title={`${selected.name} Agent Loop`}
+              className="block w-full border-0 bg-[#0c1612]"
+              loading="lazy"
+              style={{ height: workspaceHeight }}
+            />
+          ) : (
+            <div
+              className="flex w-full items-center justify-center bg-[#0c1612] px-4 py-8 sm:px-8"
+              style={{ height: workspaceHeight }}
+            >
+              <div className="mx-auto w-full max-w-3xl text-center">
+                <motion.span
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300 sm:text-[11px]"
+                >
+                  Choose Your Industry
+                </motion.span>
+                <motion.h3
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.18 }}
+                  className="mt-4 text-2xl font-bold text-white sm:text-3xl"
+                >
+                  Which agent loop do you want to see?
+                </motion.h3>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.25 }}
+                  className="mt-2 text-sm text-slate-400 sm:text-base"
+                >
+                  Each demo runs the agent against that industry&apos;s real workflows.
+                </motion.p>
+
+                <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-4">
+                  {INDUSTRIES.map((ind, i) => (
+                    <motion.button
+                      key={ind.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + i * 0.08 }}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIndustry(ind.id)}
+                      className="group relative flex flex-col items-center rounded-2xl border bg-white/[0.03] p-5 text-center backdrop-blur-sm transition-colors sm:p-6"
+                      style={{ borderColor: `${ind.color}30` }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px 0 ${ind.color}33`;
+                        (e.currentTarget as HTMLElement).style.borderColor = `${ind.color}80`;
+                        (e.currentTarget as HTMLElement).style.backgroundColor = `${ind.color}0d`;
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.boxShadow = `none`;
+                        (e.currentTarget as HTMLElement).style.borderColor = `${ind.color}30`;
+                        (e.currentTarget as HTMLElement).style.backgroundColor = `rgba(255,255,255,0.03)`;
+                      }}
+                    >
+                      <div
+                        className="flex h-12 w-12 items-center justify-center rounded-xl sm:h-14 sm:w-14"
+                        style={{ backgroundColor: `${ind.color}20` }}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="h-6 w-6 sm:h-7 sm:w-7"
+                          fill="none"
+                          stroke={ind.color}
+                          strokeWidth={1.8}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d={ind.iconPath} />
+                        </svg>
+                      </div>
+                      <h4 className="mt-4 text-base font-bold sm:text-lg" style={{ color: ind.color }}>
+                        {ind.name}
+                      </h4>
+                      <div
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold transition-all group-hover:gap-2.5 sm:text-xs"
+                        style={{ backgroundColor: `${ind.color}20`, color: ind.color }}
+                      >
+                        Launch Demo
+                        <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
 
         <p className="mt-4 text-center text-sm text-slate-400 sm:text-base">
-          Full-size chat view with internal scrolling, tuned to stay readable on mobile and fill larger screens cleanly.
+          {selected
+            ? "Full-size chat view with internal scrolling, tuned to stay readable on mobile and fill larger screens cleanly."
+            : "Pick an industry above to launch the live AI agent demo."}
         </p>
       </div>
     </div>
