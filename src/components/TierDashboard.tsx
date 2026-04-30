@@ -664,6 +664,20 @@ function AIOpsDashboard() {
   const glowColor = selected?.color ?? "#10b981";
   const workspaceHeight = "clamp(28rem, 82svh, 54rem)";
 
+  useEffect(() => {
+    const links = INDUSTRIES.map((ind) => {
+      const link = document.createElement("link");
+      link.rel = "prefetch";
+      link.as = "document";
+      link.href = ind.src;
+      document.head.appendChild(link);
+      return link;
+    });
+    return () => {
+      links.forEach((l) => l.remove());
+    };
+  }, []);
+
   return (
     <div className="relative mx-auto w-full max-w-[1320px] px-4 sm:px-6">
       <div className="relative">
@@ -826,11 +840,11 @@ function AIOpsDashboard() {
           )}
         </motion.div>
 
-        <p className="mt-4 text-center text-sm text-slate-400 sm:text-base">
-          {selected
-            ? "Full-size chat view with internal scrolling, tuned to stay readable on mobile and fill larger screens cleanly."
-            : "Pick an industry above to launch the live AI agent demo."}
-        </p>
+        {!selected && (
+          <p className="mt-4 text-center text-sm text-slate-400 sm:text-base">
+            Pick an industry above to launch the live AI agent demo.
+          </p>
+        )}
       </div>
     </div>
   );
