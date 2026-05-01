@@ -628,7 +628,7 @@ function PhoneInputBar({ accent }: { accent: string }) {
   );
 }
 
-type IndustryId = "nursing" | "homecare";
+type IndustryId = "nursing" | "homecare" | "builders";
 
 const INDUSTRIES: {
   id: IndustryId;
@@ -655,6 +655,15 @@ const INDUSTRIES: {
     src: "/acropora-agent-loop-homecare.html",
     iconPath:
       "M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10M10 14h4",
+  },
+  {
+    id: "builders",
+    name: "Builders",
+    shortName: "Builders",
+    color: "#f59e0b",
+    src: "/acropora-agent-loop.builder.html",
+    iconPath:
+      "M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z",
   },
 ];
 
@@ -781,7 +790,7 @@ function AIOpsDashboard() {
                   Each demo runs the agent against that industry&apos;s real workflows.
                 </motion.p>
 
-                <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-4">
+                <div className="mt-6 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3">
                   {INDUSTRIES.map((ind, i) => (
                     <motion.button
                       key={ind.id}
@@ -791,10 +800,10 @@ function AIOpsDashboard() {
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setIndustry(ind.id)}
-                      className="group relative flex flex-col items-center rounded-2xl border bg-white/[0.03] p-5 text-center backdrop-blur-sm transition-colors sm:p-6"
+                      className="group relative flex flex-col items-center rounded-xl border bg-white/[0.03] p-3 text-center backdrop-blur-sm transition-colors sm:p-4"
                       style={{ borderColor: `${ind.color}30` }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px 0 ${ind.color}33`;
+                        (e.currentTarget as HTMLElement).style.boxShadow = `0 0 24px 0 ${ind.color}33`;
                         (e.currentTarget as HTMLElement).style.borderColor = `${ind.color}80`;
                         (e.currentTarget as HTMLElement).style.backgroundColor = `${ind.color}0d`;
                       }}
@@ -805,12 +814,12 @@ function AIOpsDashboard() {
                       }}
                     >
                       <div
-                        className="flex h-12 w-12 items-center justify-center rounded-xl sm:h-14 sm:w-14"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg sm:h-11 sm:w-11"
                         style={{ backgroundColor: `${ind.color}20` }}
                       >
                         <svg
                           viewBox="0 0 24 24"
-                          className="h-6 w-6 sm:h-7 sm:w-7"
+                          className="h-4 w-4 sm:h-5 sm:w-5"
                           fill="none"
                           stroke={ind.color}
                           strokeWidth={1.8}
@@ -820,15 +829,15 @@ function AIOpsDashboard() {
                           <path d={ind.iconPath} />
                         </svg>
                       </div>
-                      <h4 className="mt-4 text-base font-bold sm:text-lg" style={{ color: ind.color }}>
+                      <h4 className="mt-2 text-xs font-bold sm:mt-3 sm:text-sm" style={{ color: ind.color }}>
                         {ind.name}
                       </h4>
                       <div
-                        className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold transition-all group-hover:gap-2.5 sm:text-xs"
+                        className="mt-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold transition-all group-hover:gap-1.5 sm:mt-3 sm:px-2.5 sm:text-[11px]"
                         style={{ backgroundColor: `${ind.color}20`, color: ind.color }}
                       >
-                        Launch Demo
-                        <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                        Launch
+                        <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
                       </div>
