@@ -628,7 +628,7 @@ function PhoneInputBar({ accent }: { accent: string }) {
   );
 }
 
-type IndustryId = "nursing" | "homecare" | "builders";
+type IndustryId = "nursing" | "homecare" | "builders" | "lawfirm";
 
 const INDUSTRIES: {
   id: IndustryId;
@@ -664,6 +664,15 @@ const INDUSTRIES: {
     src: "/acropora-agent-loop.builder.html",
     iconPath:
       "M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z",
+  },
+  {
+    id: "lawfirm",
+    name: "Law Firms",
+    shortName: "Law",
+    color: "#60a5fa",
+    src: "/acropora-agent-loop.lawfirm.html",
+    iconPath:
+      "M12 3v18M3 21h18M3 7h18M6 7l-3 7c0 1.66 1.34 3 3 3s3-1.34 3-3L6 7zm12 0l-3 7c0 1.66 1.34 3 3 3s3-1.34 3-3l-3-7z",
   },
 ];
 
@@ -722,7 +731,7 @@ function AIOpsDashboard() {
             )}
             <div className="flex shrink-0 items-center gap-1.5">
               {selected && (
-                <div className="flex items-center gap-1 rounded-full border border-white/10 bg-slate-900/60 p-0.5">
+                <div className="flex flex-wrap items-center justify-end gap-1 rounded-2xl border border-white/10 bg-slate-900/60 p-0.5 sm:rounded-full sm:flex-nowrap">
                   {INDUSTRIES.map((ind) => {
                     const isActive = ind.id === industry;
                     return (
@@ -790,7 +799,7 @@ function AIOpsDashboard() {
                   Each demo runs the agent against that industry&apos;s real workflows.
                 </motion.p>
 
-                <div className="mt-6 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3">
+                <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-4 sm:gap-3">
                   {INDUSTRIES.map((ind, i) => (
                     <motion.button
                       key={ind.id}
