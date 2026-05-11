@@ -628,7 +628,7 @@ function PhoneInputBar({ accent }: { accent: string }) {
   );
 }
 
-type IndustryId = "nursing" | "homecare" | "builders" | "lawfirm";
+type IndustryId = "nursing" | "homecare" | "builders" | "lawfirm" | "supplychain";
 
 const INDUSTRIES: {
   id: IndustryId;
@@ -673,6 +673,15 @@ const INDUSTRIES: {
     src: "/acropora-agent-loop.lawfirm.html",
     iconPath:
       "M12 3v18M3 21h18M3 7h18M6 7l-3 7c0 1.66 1.34 3 3 3s3-1.34 3-3L6 7zm12 0l-3 7c0 1.66 1.34 3 3 3s3-1.34 3-3l-3-7z",
+  },
+  {
+    id: "supplychain",
+    name: "Supply Chain",
+    shortName: "Supply",
+    color: "#22d3ee",
+    src: "/acropora-agent-loop-supplychain.html",
+    iconPath:
+      "M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07l-1.41 1.41M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07l1.41-1.41",
   },
 ];
 
@@ -731,7 +740,7 @@ function AIOpsDashboard() {
             )}
             <div className="flex shrink-0 items-center gap-1.5">
               {selected && (
-                <div className="flex flex-wrap items-center justify-end gap-1 rounded-2xl border border-white/10 bg-slate-900/60 p-0.5 sm:rounded-full sm:flex-nowrap">
+                <div className="flex flex-wrap items-center justify-end gap-1 rounded-2xl border border-white/10 bg-slate-900/60 p-0.5 md:rounded-full md:flex-nowrap">
                   {INDUSTRIES.map((ind) => {
                     const isActive = ind.id === industry;
                     return (
@@ -799,7 +808,7 @@ function AIOpsDashboard() {
                   Each demo runs the agent against that industry&apos;s real workflows.
                 </motion.p>
 
-                <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-4 sm:gap-3">
+                <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
                   {INDUSTRIES.map((ind, i) => (
                     <motion.button
                       key={ind.id}
