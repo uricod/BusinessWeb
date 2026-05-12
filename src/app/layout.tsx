@@ -10,7 +10,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "TheAcropora | Custom Business Applications & Consulting",
   description:
-    "We combine deep industry expertise with cutting-edge technology to build custom applications that give you complete visibility into your entire operation.",
+    "Your business at your fingertips, Autonomous, Insightful proactive chief of staff",
   keywords: [
     "custom software",
     "business consulting",
