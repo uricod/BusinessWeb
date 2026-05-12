@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import ChaosToOrderExperience from "@/components/ChaosToOrderExperience";
 import ProvenOperatorImpactSection from "@/components/ProvenOperatorImpactSection";
-import TierSelector from "@/components/TierSelector";
+import TierSelector, { TierSelectorStatic } from "@/components/TierSelector";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
@@ -11,7 +12,9 @@ export default function Home() {
       <Navbar />
       <ChaosToOrderExperience />
       <ProvenOperatorImpactSection />
-      <TierSelector />
+      <Suspense fallback={<TierSelectorStatic />}>
+        <TierSelector />
+      </Suspense>
       <Contact />
       <Footer />
     </>

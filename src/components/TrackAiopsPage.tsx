@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import ChaosToOrderExperience from "@/components/ChaosToOrderExperience";
 import ProvenOperatorImpactSection from "@/components/ProvenOperatorImpactSection";
-import TierSelector from "@/components/TierSelector";
+import TierSelector, { TierSelectorStatic } from "@/components/TierSelector";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
@@ -15,10 +16,19 @@ export default function TrackAiopsPage({ initialIndustryOverride = null }: Track
       <Navbar />
       <ChaosToOrderExperience />
       <ProvenOperatorImpactSection />
-      <TierSelector
-        initialTierOverride="aiops"
-        initialIndustryOverride={initialIndustryOverride}
-      />
+      <Suspense
+        fallback={(
+          <TierSelectorStatic
+            initialTierOverride="aiops"
+            initialIndustryOverride={initialIndustryOverride}
+          />
+        )}
+      >
+        <TierSelector
+          initialTierOverride="aiops"
+          initialIndustryOverride={initialIndustryOverride}
+        />
+      </Suspense>
       <Contact />
       <Footer />
     </>

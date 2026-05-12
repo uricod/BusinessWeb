@@ -51,18 +51,14 @@ interface TierSelectorProps {
   initialIndustryOverride?: string | null;
 }
 
-export default function TierSelector({
+export function TierSelectorStatic({
   initialTierOverride = null,
   initialIndustryOverride = null,
 }: TierSelectorProps) {
-  const searchParams = useSearchParams();
-  const requestedTier = searchParams.get("track");
-  const requestedIndustry = searchParams.get("industry");
-  const initialTier = initialTierOverride ?? (isTierId(requestedTier) ? requestedTier : null);
-  const industryFromUrl = requestedIndustry !== null && ACROPORA_INDUSTRIES.has(requestedIndustry)
-    ? requestedIndustry
+  const initialTier = initialTierOverride;
+  const initialIndustry = initialIndustryOverride !== null && ACROPORA_INDUSTRIES.has(initialIndustryOverride)
+    ? initialIndustryOverride
     : null;
-  const initialIndustry = initialIndustryOverride ?? industryFromUrl;
   const [selectedTier, setSelectedTier] = useState<TierId | null>(initialTier);
   const selectorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -407,5 +403,20 @@ export default function TierSelector({
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+export default function TierSelector(props: TierSelectorProps) {
+  const searchParams = useSearchParams();
+  const requestedTier = searchParams.get("track");
+  const requestedIndustry = searchParams.get("industry");
+  const resolvedTier = props.initialTierOverride ?? (isTierId(requestedTier) ? requestedTier : null);
+  const resolvedIndustry = props.initialIndustryOverride ?? requestedIndustry;
+
+  return (
+    <TierSelectorStatic
+      initialTierOverride={resolvedTier}
+      initialIndustryOverride={resolvedIndustry}
+    />
   );
 }
