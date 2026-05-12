@@ -628,7 +628,7 @@ function PhoneInputBar({ accent }: { accent: string }) {
   );
 }
 
-type IndustryId = "nursing" | "homecare" | "builders" | "lawfirm" | "supplychain";
+type IndustryId = "nursing" | "homecare" | "builders" | "lawfirm" | "supplychain" | "behavioralhealth";
 
 const INDUSTRIES: {
   id: IndustryId;
@@ -682,6 +682,15 @@ const INDUSTRIES: {
     src: "/acropora-agent-loop-supplychain.html",
     iconPath:
       "M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07l-1.41 1.41M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07l1.41-1.41",
+  },
+  {
+    id: "behavioralhealth",
+    name: "Behavioral Health",
+    shortName: "ABA",
+    color: "#a78bfa",
+    src: "/acropora-agent-loop-behavorial-health.html",
+    iconPath:
+      "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
   },
 ];
 
@@ -808,7 +817,7 @@ function AIOpsDashboard() {
                   Each demo runs the agent against that industry&apos;s real workflows.
                 </motion.p>
 
-                <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
+                <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
                   {INDUSTRIES.map((ind, i) => (
                     <motion.button
                       key={ind.id}
