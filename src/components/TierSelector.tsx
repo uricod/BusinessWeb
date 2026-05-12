@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import TierDashboard from "./TierDashboard";
 import TierCaseStudies from "./TierCaseStudies";
 
@@ -32,10 +33,55 @@ export const tiers: Tier[] = [
   },
 ];
 
-export default function TierSelector() {
-  const [selectedTier, setSelectedTier] = useState<TierId | null>(null);
+const ACROPORA_INDUSTRIES = new Set([
+  "nursing",
+  "homecare",
+  "builders",
+  "lawfirm",
+  "supplychain",
+  "behavioralhealth",
+]);
+
+function isTierId(value: string | null): value is TierId {
+  return tiers.some((tier) => tier.id === value);
+}
+
+interface TierSelectorProps {
+  initialTierOverride?: TierId | null;
+  initialIndustryOverride?: string | null;
+}
+
+export default function TierSelector({
+  initialTierOverride = null,
+  initialIndustryOverride = null,
+}: TierSelectorProps) {
+  const searchParams = useSearchParams();
+  const requestedTier = searchParams.get("track");
+  const requestedIndustry = searchParams.get("industry");
+  const initialTier = initialTierOverride ?? (isTierId(requestedTier) ? requestedTier : null);
+  const industryFromUrl = requestedIndustry !== null && ACROPORA_INDUSTRIES.has(requestedIndustry)
+    ? requestedIndustry
+    : null;
+  const initialIndustry = initialIndustryOverride ?? industryFromUrl;
+  const [selectedTier, setSelectedTier] = useState<TierId | null>(initialTier);
   const selectorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const hasAutoScrolledRef = useRef(false);
+
+  useEffect(() => {
+    if (!initialTier || hasAutoScrolledRef.current) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      hasAutoScrolledRef.current = true;
+    }, 120);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [initialTier]);
 
   const handleSelect = (tierId: TierId) => {
     setSelectedTier(tierId);
@@ -326,7 +372,10 @@ export default function TierSelector() {
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <TierDashboard tier={selectedTierData} />
+            <TierDashboard
+              tier={selectedTierData}
+              initialIndustry={selectedTier === "aiops" ? initialIndustry : null}
+            />
             <TierCaseStudies tierId={selectedTier} />
 
             {/* Explore Another Path */}

@@ -630,6 +630,10 @@ function PhoneInputBar({ accent }: { accent: string }) {
 
 type IndustryId = "nursing" | "homecare" | "builders" | "lawfirm" | "supplychain" | "behavioralhealth";
 
+function isIndustryId(value: string | null | undefined): value is IndustryId {
+  return INDUSTRIES.some((industry) => industry.id === value);
+}
+
 const INDUSTRIES: {
   id: IndustryId;
   name: string;
@@ -694,8 +698,10 @@ const INDUSTRIES: {
   },
 ];
 
-function AIOpsDashboard() {
-  const [industry, setIndustry] = useState<IndustryId | null>(null);
+function AIOpsDashboard({ initialIndustry = null }: { initialIndustry?: string | null }) {
+  const [industry, setIndustry] = useState<IndustryId | null>(
+    isIndustryId(initialIndustry) ? initialIndustry : null,
+  );
   const selected = INDUSTRIES.find((i) => i.id === industry);
   const glowColor = selected?.color ?? "#10b981";
   const workspaceHeight = "clamp(28rem, 82svh, 54rem)";
@@ -888,14 +894,15 @@ function AIOpsDashboard() {
 
 interface TierDashboardProps {
   tier: Tier;
+  initialIndustry?: string | null;
 }
 
-export default function TierDashboard({ tier }: TierDashboardProps) {
+export default function TierDashboard({ tier, initialIndustry = null }: TierDashboardProps) {
   const dashboardComponents: Record<string, React.ReactNode> = {
     precision: <PrecisionDashboard />,
     visibility: <VisibilityDashboard />,
     automation: <SmartAutomationDashboard />,
-    aiops: <AIOpsDashboard />,
+    aiops: <AIOpsDashboard initialIndustry={initialIndustry} />,
   };
 
   const sectionTitles: Record<string, { badge: string; heading: string; subheading: string }> = {
