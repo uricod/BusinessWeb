@@ -690,7 +690,7 @@ const INDUSTRIES: {
   {
     id: "behavioralhealth",
     name: "Behavioral Health",
-    shortName: "ABA",
+    shortName: "Behavioral",
     color: "#a78bfa",
     src: "/acropora-agent-loop-behavorial-health.html",
     iconPath:
