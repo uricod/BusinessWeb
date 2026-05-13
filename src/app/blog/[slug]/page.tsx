@@ -1,4 +1,5 @@
 import { getAllSlugs, getPostBySlug } from "@/lib/blog";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/siteMetadata";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ArticleClient from "./ArticleClient";
@@ -17,12 +18,12 @@ export async function generateMetadata({
   if (!post) return {};
 
   return {
-    title: `${post.title} | TheAcropora`,
-    description: post.description,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     keywords: post.keywords,
     openGraph: {
-      title: post.title,
-      description: post.description,
+      title: SITE_TITLE,
+      description: SITE_DESCRIPTION,
       type: "article",
       publishedTime: post.date,
       authors: [post.author],

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/siteMetadata";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TheAcropora | Custom Business Applications & Consulting",
-  description:
-    "Your business at your fingertips, Autonomous, Insightful proactive chief of staff",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   keywords: [
     "custom software",
     "business consulting",
@@ -22,6 +23,21 @@ export const metadata: Metadata = {
     "real estate software",
     "ecommerce solutions",
   ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: "TheAcropora",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
